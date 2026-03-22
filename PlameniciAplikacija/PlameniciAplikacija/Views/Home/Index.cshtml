@@ -1,8 +1,180 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using PlameniciAplikacija.Models
+@model IEnumerable<Project>
+@{
+    ViewData["Title"] = "Projekti";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<div class="row">
+            @functions {
+                string GetStatusColor(string status)
+                {
+                    return status switch
+                    {
+                        "NijeStartano" => "table-danger",
+                        "Startano" => "table-warning",
+                        "Zavrseno" => "table-success",
+                        _ => ""
+                    };
+                }
+            }
+            @if (Model != null)
+            {
+                var index = 0;
+                foreach (var projekt in Model)
+                {
+                    <tr>
+                        <td>@projekt.BrojProjekta</td>
+                        <td>@projekt.Naziv</td>
+                        <td>@projekt.Kupac?.Naziv</td>
+                        <td>@projekt.DatumUnosa.ToShortDateString()</td>
+                        <td class="@GetStatusColor(projekt.StatusPripremeRada.ToString())">@projekt.StatusPripremeRada</td>
+                        <td class="@GetStatusColor(projekt.StatusLansiranja.ToString())">@projekt.StatusLansiranja</td>
+                        <td class="@GetStatusColor(projekt.StatusProizvodnje.ToString())">@projekt.StatusProizvodnje</td>
+                        <td>
+                            <input type="text" class="form-control napomena-input" data-index="@index" value="@projekt.Napomena" />
+                            <button class="btn btn-sm btn-primary btn-napomena" data-index="@index">Spremi</button>
+                        </td>
+                        <td>@projekt.OcekivaniRokIsporuke?.ToShortDateString()</td>
+                        <td>@projekt.RealniRokIsporuke?.ToShortDateString()</td>
+                        <td>@((projekt.RealniRokIsporuke.HasValue && projekt.OcekivaniRokIsporuke.HasValue) ? (projekt.RealniRokIsporuke.Value - projekt.OcekivaniRokIsporuke.Value).Days.ToString() : "")</td>
+                        <td>@projekt.Napomena</td>
+                    </tr>
+                    index++;
+                }
+            }
+            <thead class="table-light">
+                <tr>
+                    <th>Broj projekta</th>
+                    <th>Naziv projekta</th>
+                    <th>Kupac</th>
+                    <th>Datum unosa</th>
+                    <th>Status pripreme rada</th>
+                    <th>Status lansiranja</th>
+                    <th>Status proizvodnje</th>
+                    <th>Dodaj napomenu</th>
+                    <th>Očekivani rok isporuke</th>
+                    <th>Realni rok isporuke</th>
+                    <th>Kašnjenje (dana)</th>
+                    <th>Napomena</th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model != null)
+            {
+                var index = 0;
+                foreach (var projekt in Model)
+                {
+                    string GetStatusColor(string status)
+                    {
+                        return status switch
+                        {
+                            "NijeStartano" => "table-danger",
+                            "Startano" => "table-warning",
+                            "Zavrseno" => "table-success",
+                            @using PlameniciAplikacija.Models
+                            @model IEnumerable<Project>
+                            @{
+                                ViewData["Title"] = "Projekti";
+                            }
+
+                            <div class="netflix-bg">
+                                <div class="netflix-sidebar">
+                                    <h5 class="sidebar-title">Djelatnici</h5>
+                                    <ul id="djelatniciList" class="sidebar-list"></ul>
+                                    <h5 class="sidebar-title">Napomene</h5>
+                                    <ul id="napomeneList" class="sidebar-list"></ul>
+                                </div>
+                                <div class="netflix-main">
+                                    <h2 class="netflix-title">Projekti</h2>
+                                    <div class="netflix-row" id="projektiRow">
+                                        @if (Model != null)
+                                        {
+                                            var index = 0;
+                                            foreach (var projekt in Model)
+                                            {
+                                                <div class="netflix-card project-row" data-index="@index">
+                                                    <div class="card-header">
+                                                        <span class="badge bg-secondary">@projekt.BrojProjekta</span>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <h5>@projekt.Naziv</h5>
+                                                        <div class="card-meta">Kupac: @projekt.Kupac?.Naziv</div>
+                                                        <div class="card-meta">Datum: @projekt.DatumUnosa.ToShortDateString()</div>
+                                                        <div class="card-meta">Status: @projekt.StatusProizvodnje</div>
+                                                    </div>
+                                                    <div class="card-footer">
+                                                        <select class="form-select form-select-sm status-select" data-type="proizvodnja" data-index="@index">
+                                                            @foreach (var s in Enum.GetValues(typeof(StatusProizvodnje)))
+                                                            {
+                                                                if (projekt.StatusProizvodnje == (StatusProizvodnje)s)
+                                                                {
+                                                                    <option value="@s" selected>@s</option>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <option value="@s">@s</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                index++;
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                <tr><th>Napomene</th><td>${napomene}</td></tr>
+                <tr><th>Radni nalozi</th><td>${radniNalozi}</td></tr>
+                <tr><th>Stavke proizvodnje</th><td>${stavke}</td></tr>
+            </table>`;
+            $("#detailsContent").html(html);
+            $("#projectDetails").show();
+        });
+
+        // Inline promjena statusa (backend spremanje)
+        $(".status-select").on("change", function () {
+            const index = $(this).data("index");
+            const type = $(this).data("type");
+            const value = $(this).val();
+            const id = projekti[index].Id;
+            $.ajax({
+                url: `/Home/UpdateStatus?id=${id}&statusType=${type}&newValue=${value}`,
+                type: 'PUT',
+                success: function () {
+                    projekti[index][{
+                        'priprema': 'StatusPripremeRada',
+                        'lansiranje': 'StatusLansiranja',
+                        'proizvodnja': 'StatusProizvodnje'
+                    }[type]] = value;
+                    // Osvježi UI po potrebi
+                },
+                error: function () {
+                    alert('Greška pri spremanju statusa!');
+                    foreach (var projekt in Model)
+                    {
+                        <tr>
+                            <td>@projekt.BrojProjekta</td>
+                            <td>@projekt.Naziv</td>
+                            <td>@projekt.Kupac?.Naziv</td>
+                            <td>@projekt.DatumUnosa.ToShortDateString()</td>
+                            <td class="@GetStatusColor(projekt.StatusPripremeRada.ToString())">
+                                @projekt.StatusPripremeRada
+                            </td>
+                            <td class="@GetStatusColor(projekt.StatusLansiranja.ToString())">
+                                @projekt.StatusLansiranja
+                            </td>
+                            <td class="@GetStatusColor(projekt.StatusProizvodnje.ToString())">
+                                @projekt.StatusProizvodnje
+                            </td>
+                            <td>
+                                <input type="text" class="form-control napomena-input" data-index="@index" value="@projekt.Napomena" />
+                                <button class="btn btn-sm btn-primary btn-napomena" data-index="@index">Spremi</button>
+                            </td>
+                            <td>@projekt.OcekivaniRokIsporuke?.ToShortDateString()</td>
+                            <td>@projekt.RealniRokIsporuke?.ToShortDateString()</td>
+                            <td>@((projekt.RealniRokIsporuke.HasValue && projekt.OcekivaniRokIsporuke.HasValue) ? (projekt.RealniRokIsporuke.Value - projekt.OcekivaniRokIsporuke.Value).Days.ToString() : "")</td>
+                            <td>@projekt.Napomena</td>
+                        </tr>
+                        index++;

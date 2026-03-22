@@ -1,0 +1,60 @@
+@model PlameniciAplikacija.Models.Project
+@{
+    ViewData["Title"] = "Novi projekt";
+}
+
+<h2>Novi projekt</h2>
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label asp-for="BrojProjekta" class="form-label"></label>
+        <input asp-for="BrojProjekta" class="form-control" />
+        <span asp-validation-for="BrojProjekta" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Naziv" class="form-label"></label>
+        <input asp-for="Naziv" class="form-control" />
+        <span asp-validation-for="Naziv" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Kupac" class="form-label"></label>
+        <input asp-for="Kupac" class="form-control" />
+        <span asp-validation-for="Kupac" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="DatumUnosa" class="form-label"></label>
+        <input asp-for="DatumUnosa" class="form-control" type="date" />
+        <span asp-validation-for="DatumUnosa" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="StatusPripremeRada" class="form-label"></label>
+        <select asp-for="StatusPripremeRada" class="form-select" asp-items="Html.GetEnumSelectList<PlameniciAplikacija.Models.StatusTriStanja>()"></select>
+        <span asp-validation-for="StatusPripremeRada" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="StatusLansiranja" class="form-label"></label>
+        <select asp-for="StatusLansiranja" class="form-select" asp-items="Html.GetEnumSelectList<PlameniciAplikacija.Models.StatusTriStanja>()"></select>
+        <span asp-validation-for="StatusLansiranja" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="StatusProizvodnje" class="form-label"></label>
+        <select asp-for="StatusProizvodnje" class="form-select" asp-items="Html.GetEnumSelectList<PlameniciAplikacija.Models.StatusProizvodnje>()"></select>
+        <span asp-validation-for="StatusProizvodnje" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="OcekivaniRokIsporuke" class="form-label"></label>
+        <input asp-for="OcekivaniRokIsporuke" class="form-control" type="date" />
+        <span asp-validation-for="OcekivaniRokIsporuke" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="RealniRokIsporuke" class="form-label"></label>
+        <input asp-for="RealniRokIsporuke" class="form-control" type="date" />
+        <span asp-validation-for="RealniRokIsporuke" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Napomena" class="form-label"></label>
+        <textarea asp-for="Napomena" class="form-control"></textarea>
+        <span asp-validation-for="Napomena" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Spremi</button>
+    <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+</form>

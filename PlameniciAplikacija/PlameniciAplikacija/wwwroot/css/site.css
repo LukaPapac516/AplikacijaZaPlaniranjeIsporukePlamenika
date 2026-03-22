@@ -1,3 +1,98 @@
+/* Netflix style dark theme and cards */
+.netflix-bg {
+  display: flex;
+  min-height: 90vh;
+  background: #181818;
+  color: #fff;
+}
+.netflix-sidebar {
+  width: 220px;
+  background: #111;
+  padding: 24px 12px;
+  border-right: 2px solid #222;
+  min-height: 90vh;
+}
+.sidebar-title {
+  color: #e50914;
+  font-size: 1.1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.sidebar-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+.sidebar-list li {
+  padding: 4px 0;
+  border-bottom: 1px solid #222;
+  font-size: 0.95rem;
+}
+/* Netflix main area responsive and narrower */
+.netflix-main {
+  flex: 1;
+  padding: 24px 12px 24px 12px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.netflix-title {
+  color: #e50914;
+  font-size: 1.7rem;
+  margin-bottom: 1.2rem;
+  text-align: left;
+}
+.netflix-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  overflow-x: auto;
+  padding-bottom: 18px;
+  justify-content: flex-start;
+}
+.netflix-card {
+  background: #222;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  width: 210px;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.18s;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+.netflix-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 16px rgba(229,9,20,0.18);
+}
+.card-header {
+  padding: 10px 12px 0 12px;
+  font-size: 1rem;
+}
+.card-body {
+  padding: 6px 12px;
+}
+.card-meta {
+  font-size: 0.9rem;
+  color: #bbb;
+  margin-bottom: 2px;
+}
+.card-footer {
+  padding: 6px 12px 10px 12px;
+  border-top: 1px solid #333;
+}
+@media (max-width: 1100px) {
+  .netflix-main { max-width: 98vw; }
+  .netflix-row { gap: 10px; }
+  .netflix-card { width: 170px; min-height: 120px; }
+}
+@media (max-width: 700px) {
+  .netflix-main { padding: 8px 2vw; }
+  .netflix-title { font-size: 1.1rem; }
+  .netflix-card { width: 98vw; min-width: 98vw; margin: 0 auto 10px auto; }
+  .netflix-row { flex-direction: column; gap: 0; }
+}
 html {
   font-size: 14px;
 }
