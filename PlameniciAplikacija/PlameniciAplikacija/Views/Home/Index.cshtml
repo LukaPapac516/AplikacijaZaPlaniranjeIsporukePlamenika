@@ -10,6 +10,7 @@
             "NijeStartano" => "table-danger",
             "Startano" => "table-warning",
             "Zavrseno" => "table-success",
+            "NijeUProizvodnji" => "table-secondary",
             "Gotovo" => "table-success",
             _ => string.Empty
         };
@@ -18,30 +19,26 @@
 
 <h2 class="mb-3">Projekti</h2>
 
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="alert alert-success" role="alert">
+        @successMessage
+    </div>
+    <script>
+        alert('@successMessage');
+    </script>
+}
+
+@if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div class="alert alert-danger" role="alert">
+        @errorMessage
+    </div>
+}
+
 <form method="get" asp-action="Index" class="row g-2 mb-3">
     <div class="col-md-4">
-        <input type="text" name="search" value="@Context.Request.Query["search"]" class="form-control" placeholder="Pretraga po broju, nazivu, kupcu" />
-    </div>
-    <div class="col-md-2">
-        <input type="date" name="dateFrom" value="@Context.Request.Query["dateFrom"]" class="form-control" />
-    </div>
-    <div class="col-md-2">
-        <input type="date" name="dateTo" value="@Context.Request.Query["dateTo"]" class="form-control" />
-    </div>
-    <div class="col-md-2">
-        <select name="statusPripreme" class="form-select" asp-items="Html.GetEnumSelectList<StatusTriStanja>()">
-            <option value="">Priprema rada</option>
-        </select>
-    </div>
-    <div class="col-md-2">
-        <select name="statusLansiranja" class="form-select" asp-items="Html.GetEnumSelectList<StatusTriStanja>()">
-            <option value="">Lansiranje</option>
-        </select>
-    </div>
-    <div class="col-md-2">
-        <select name="statusProizvodnje" class="form-select" asp-items="Html.GetEnumSelectList<StatusProizvodnje>()">
-            <option value="">Proizvodnja</option>
-        </select>
+        <input type="text" name="search" value="@Context.Request.Query["search"]" class="form-control" placeholder="Pretraga: broj, naziv, kupac ili datum (npr. 4/10/2026)" />
     </div>
     <div class="col-md-2">
         <button type="submit" class="btn btn-primary w-100">Filtriraj</button>
@@ -66,6 +63,8 @@
                 <th>Realni rok</th>
                 <th>Kašnjenje (dana)</th>
                 <th>Napomena</th>
+                <th>Prioritet</th>
+                <th>Akcije</th>
             </tr>
         </thead>
         <tbody>
@@ -73,25 +72,88 @@
             {
                 foreach (var projekt in Model)
                 {
+                    var updateFormId = $"update-{projekt.Id}";
                     <tr>
                         <td>@projekt.BrojProjekta</td>
                         <td>@projekt.Naziv</td>
                         <td>@projekt.Kupac?.Naziv</td>
                         <td>@projekt.DatumUnosa.ToShortDateString()</td>
-                        <td class="@GetStatusColor(projekt.StatusPripremeRada.ToString())">@projekt.StatusPripremeRada</td>
-                        <td class="@GetStatusColor(projekt.StatusLansiranja.ToString())">@projekt.StatusLansiranja</td>
-                        <td class="@GetStatusColor(projekt.StatusProizvodnje.ToString())">@projekt.StatusProizvodnje</td>
+                        <td>
+                            <select form="@updateFormId" name="statusPripremeRada" class="form-select form-select-sm @GetStatusColor(projekt.StatusPripremeRada.ToString())">
+                                @foreach (var status in Enum.GetValues<StatusTriStanja>())
+                                {
+                                    if (status == projekt.StatusPripremeRada)
+                                    {
+                                        <option value="@status" selected>@status</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@status">@status</option>
+                                    }
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select form="@updateFormId" name="statusLansiranja" class="form-select form-select-sm @GetStatusColor(projekt.StatusLansiranja.ToString())">
+                                @foreach (var status in Enum.GetValues<StatusTriStanja>())
+                                {
+                                    if (status == projekt.StatusLansiranja)
+                                    {
+                                        <option value="@status" selected>@status</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@status">@status</option>
+                                    }
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select form="@updateFormId" name="statusProizvodnje" class="form-select form-select-sm @GetStatusColor(projekt.StatusProizvodnje.ToString())">
+                                @foreach (var status in Enum.GetValues<StatusProizvodnje>())
+                                {
+                                    if (status == projekt.StatusProizvodnje)
+                                    {
+                                        <option value="@status" selected>@status</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@status">@status</option>
+                                    }
+                                }
+                            </select>
+                        </td>
                         <td>@projekt.OcekivaniRokIsporuke?.ToShortDateString()</td>
-                        <td>@projekt.RealniRokIsporuke?.ToShortDateString()</td>
+                        <td>
+                            <input form="@updateFormId" type="date" name="realniRokIsporuke" value="@(projekt.RealniRokIsporuke?.ToString("yyyy-MM-dd"))" class="form-control form-control-sm" />
+                        </td>
                         <td>@projekt.Kasnjenje</td>
-                        <td>@projekt.Napomena</td>
+                        <td>
+                            <input form="@updateFormId" type="text" name="napomena" value="@projekt.Napomena" class="form-control form-control-sm" />
+                        </td>
+                        <td class="text-center">
+                            <div class="form-check form-switch d-inline-flex align-items-center justify-content-center">
+                                <input form="@updateFormId" class="form-check-input" type="checkbox" name="prioritet" value="true" @(projekt.Prioritet ? "checked" : string.Empty) />
+                            </div>
+                        </td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@projekt.Id" class="btn btn-sm btn-secondary mb-1">Otvori</a>
+                            <form id="@updateFormId" asp-action="Update" method="post" class="mb-1">
+                                <input type="hidden" name="id" value="@projekt.Id" />
+                                <button type="submit" class="btn btn-sm btn-primary">Spremi</button>
+                            </form>
+                            <form asp-action="Delete" method="post" class="mt-1" onsubmit="return confirm('Obrisati projekt?');">
+                                <input type="hidden" name="id" value="@projekt.Id" />
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
                     </tr>
                 }
             }
             else
             {
                 <tr>
-                    <td colspan="11" class="text-center">Nema projekata za prikaz.</td>
+                    <td colspan="12" class="text-center">Nema projekata za prikaz.</td>
                 </tr>
             }
         </tbody>

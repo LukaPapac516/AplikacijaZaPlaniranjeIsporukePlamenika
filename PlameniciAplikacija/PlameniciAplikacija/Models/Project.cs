@@ -12,6 +12,7 @@ namespace PlameniciAplikacija.Models
 
     public enum StatusProizvodnje
     {
+        NijeUProizvodnji,
         BravariZavarivaci,
         Farbanje,
         Montaza,
@@ -24,8 +25,8 @@ namespace PlameniciAplikacija.Models
         public int Id { get; set; }
         public string BrojProjekta { get; set; }
         public string Naziv { get; set; }
-        public int KupacId { get; set; }
-        public Kupac Kupac { get; set; }
+        public int? KupacId { get; set; }
+        public Kupac? Kupac { get; set; }
         public DateTime DatumUnosa { get; set; }
 
         public StatusTriStanja StatusPripremeRada { get; set; }
@@ -45,7 +46,7 @@ namespace PlameniciAplikacija.Models
                 return null;
             }
         }
-        public string Napomena { get; set; }
+        public string Napomena { get; set; } = string.Empty;
 
         public bool Prioritet { get; set; } // Ako je true, prikazati poseban stil
 
