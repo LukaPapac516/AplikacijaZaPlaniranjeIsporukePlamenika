@@ -3,13 +3,13 @@
     "UserPromptSubmit": [
       {
         "type": "command",
-        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"$input | Add-Content -Path 'C:\\git\\.github\\hooks\\agent_log.txt'\""
+        "command": "powershell.exe -ExecutionPolicy Bypass -File \"C:\\Users\\lukap\\Desktop\\Aplikacija za isporuku plamenika\\PlameniciAplikacija\\PlameniciAplikacija\\.github\\copilot\\log_hook.ps1\" -LogPrefix \"USER\" -Message \"$input\""
       }
     ],
     "preToolUse": [
       {
         "type": "command",
-        "command": "powershell.exe -ExecutionPolicy Bypass -Command \"$input | Add-Content -Path 'C:\\git\\.github\\hooks\\agent_log.txt'\""
+        "command": "powershell.exe -ExecutionPolicy Bypass -File \"C:\\Users\\lukap\\Desktop\\Aplikacija za isporuku plamenika\\PlameniciAplikacija\\PlameniciAplikacija\\.github\\copilot\\log_hook.ps1\" -LogPrefix \"AI\" -Message \"$input\""
       }
     ]
   }
