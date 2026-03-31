@@ -97,18 +97,27 @@ namespace PlameniciAplikacija.Controllers
         [HttpGet]
         public IActionResult Create()
         {
+            ViewBag.Kupci = Kupci;
             return View();
         }
 
         [HttpPost]
         public IActionResult Create(Project projekt)
         {
+            projekt.Kupac = Kupci.FirstOrDefault(k => k.Id == projekt.KupacId);
+            if (projekt.Kupac == null)
+            {
+                ModelState.AddModelError(nameof(projekt.KupacId), "Odaberite kupca.");
+            }
+
             if (ModelState.IsValid)
             {
                 projekt.Id = Projekti.Count > 0 ? Projekti.Max(p => p.Id) + 1 : 1;
                 Projekti.Add(projekt);
                 return RedirectToAction("Index");
             }
+
+            ViewBag.Kupci = Kupci;
             return View(projekt);
         }
 

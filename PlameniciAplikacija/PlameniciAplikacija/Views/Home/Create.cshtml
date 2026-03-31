@@ -1,4 +1,5 @@
 @model PlameniciAplikacija.Models.Project
+@using Microsoft.AspNetCore.Mvc.Rendering
 @{
     ViewData["Title"] = "Novi projekt";
 }
@@ -16,9 +17,11 @@
         <span asp-validation-for="Naziv" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label asp-for="Kupac" class="form-label"></label>
-        <input asp-for="Kupac" class="form-control" />
-        <span asp-validation-for="Kupac" class="text-danger"></span>
+        <label asp-for="KupacId" class="form-label">Kupac</label>
+        <select asp-for="KupacId" class="form-select" asp-items="@(new SelectList((IEnumerable<PlameniciAplikacija.Models.Kupac>)ViewBag.Kupci, "Id", "Naziv"))">
+            <option value="">-- Odaberi kupca --</option>
+        </select>
+        <span asp-validation-for="KupacId" class="text-danger"></span>
     </div>
     <div class="mb-3">
         <label asp-for="DatumUnosa" class="form-label"></label>
