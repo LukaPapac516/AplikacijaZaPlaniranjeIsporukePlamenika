@@ -1,0 +1,64 @@
+@model IEnumerable<PlameniciAplikacija.Models.Kupac>
+@{
+    ViewData["Title"] = "Kupci";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Kupci</h2>
+    <a asp-action="Create" class="btn btn-primary">Dodaj kupca</a>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="alert alert-success" role="alert">@successMessage</div>
+}
+@if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div class="alert alert-danger" role="alert">@errorMessage</div>
+}
+
+@if (Model != null && Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Naziv</th>
+                    <th>Grad</th>
+                    <th>Kontakt osoba</th>
+                    <th>Email</th>
+                    <th>Telefon</th>
+                    <th>Tip</th>
+                    <th>Datum unosa</th>
+                    <th>Aktivni projekti</th>
+                    <th>Akcije</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var kupac in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@kupac.Naziv</td>
+                        <td>@kupac.Grad</td>
+                        <td>@kupac.KontaktOsoba</td>
+                        <td>@kupac.Email</td>
+                        <td>@kupac.Telefon</td>
+                        <td>@kupac.Tip</td>
+                        <td>@kupac.DatumUnosa.ToShortDateString()</td>
+                        <td>@kupac.Projekti?.Count</td>
+                        <td>
+                            <form asp-action="Delete" method="post" onsubmit="return confirm('Obrisati kupca i raskinuti vezu s projektima?');">
+                                <input type="hidden" name="id" value="@kupac.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Obriši</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p class="text-muted">Nema registriranih kupaca.</p>
+}

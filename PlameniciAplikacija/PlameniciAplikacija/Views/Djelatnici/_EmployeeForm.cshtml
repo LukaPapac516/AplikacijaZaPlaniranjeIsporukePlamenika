@@ -1,0 +1,57 @@
+@model PlameniciAplikacija.Models.Djelatnik
+@using PlameniciAplikacija.Models
+@{
+    var projekti = ViewBag.Projekti as IEnumerable<Project> ?? Enumerable.Empty<Project>();
+    var selektirani = ViewBag.SelektiraniProjekti as HashSet<int> ?? new HashSet<int>();
+}
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <label asp-for="Ime" class="form-label"></label>
+        <input asp-for="Ime" class="form-control" />
+        <span asp-validation-for="Ime" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Prezime" class="form-label"></label>
+        <input asp-for="Prezime" class="form-control" />
+        <span asp-validation-for="Prezime" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" type="email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="RadnoMjesto" class="form-label"></label>
+        <input asp-for="RadnoMjesto" class="form-control" />
+        <span asp-validation-for="RadnoMjesto" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Tip" class="form-label"></label>
+        <select asp-for="Tip" class="form-select" asp-items="Html.GetEnumSelectList<TipDjelatnika>()"></select>
+        <span asp-validation-for="Tip" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="DatumZaposlenja" class="form-label"></label>
+        <input asp-for="DatumZaposlenja" type="date" class="form-control" />
+        <span asp-validation-for="DatumZaposlenja" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <label class="form-label">Dodijeljeni projekti</label>
+        <select class="form-select" name="projektiIds" multiple size="6">
+            @foreach (var projekt in projekti)
+            {
+                var selected = selektirani.Contains(projekt.Id);
+                if (selected)
+                {
+                    <option value="@projekt.Id" selected>@projekt.BrojProjekta - @projekt.Naziv</option>
+                }
+                else
+                {
+                    <option value="@projekt.Id">@projekt.BrojProjekta - @projekt.Naziv</option>
+                }
+            }
+        </select>
+        <small class="text-muted">Držite CTRL (ili CMD) za višestruki odabir.</small>
+    </div>
+</div>

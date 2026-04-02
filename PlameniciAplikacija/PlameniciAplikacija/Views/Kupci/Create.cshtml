@@ -1,0 +1,58 @@
+@model PlameniciAplikacija.Models.Kupac
+@{
+    ViewData["Title"] = "Dodaj kupca";
+}
+
+<h2 class="mb-3">Novi kupac</h2>
+<form asp-action="Create" method="post" class="row g-3">
+    <div asp-validation-summary="ModelOnly" class="text-danger col-12"></div>
+    <div class="col-md-6">
+        <label asp-for="Naziv" class="form-label"></label>
+        <input asp-for="Naziv" class="form-control" />
+        <span asp-validation-for="Naziv" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="OIB" class="form-label"></label>
+        <input asp-for="OIB" class="form-control" />
+        <span asp-validation-for="OIB" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Adresa" class="form-label"></label>
+        <input asp-for="Adresa" class="form-control" />
+        <span asp-validation-for="Adresa" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Grad" class="form-label"></label>
+        <input asp-for="Grad" class="form-control" />
+        <span asp-validation-for="Grad" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="KontaktOsoba" class="form-label"></label>
+        <input asp-for="KontaktOsoba" class="form-control" />
+        <span asp-validation-for="KontaktOsoba" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" type="email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="Telefon" class="form-label"></label>
+        <input asp-for="Telefon" class="form-control" />
+        <span asp-validation-for="Telefon" class="text-danger"></span>
+    </div>
+    <div class="col-md-3">
+        <label asp-for="Tip" class="form-label"></label>
+        <select asp-for="Tip" class="form-select" asp-items="Html.GetEnumSelectList<PlameniciAplikacija.Models.TipKupca>()"></select>
+        <span asp-validation-for="Tip" class="text-danger"></span>
+    </div>
+    <div class="col-md-3">
+        <label asp-for="DatumUnosa" class="form-label"></label>
+        <input asp-for="DatumUnosa" type="date" class="form-control" />
+        <span asp-validation-for="DatumUnosa" class="text-danger"></span>
+    </div>
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Spremi kupca</button>
+        <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+    </div>
+</form>

@@ -1,0 +1,77 @@
+@model IEnumerable<PlameniciAplikacija.Models.Djelatnik>
+@{
+    ViewData["Title"] = "Djelatnici";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Tim i djelatnici</h2>
+    <a asp-action="Create" class="btn btn-primary">Dodaj djelatnika</a>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="alert alert-success" role="alert">@successMessage</div>
+}
+@if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div class="alert alert-danger" role="alert">@errorMessage</div>
+}
+
+@if (Model != null && Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Ime i prezime</th>
+                    <th>Radno mjesto</th>
+                    <th>Tip</th>
+                    <th>Email</th>
+                    <th>Datum zaposlenja</th>
+                    <th>Aktivni projekti</th>
+                    <th>Akcije</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var djelatnik in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@djelatnik.Ime @djelatnik.Prezime</td>
+                        <td>@djelatnik.RadnoMjesto</td>
+                        <td>@djelatnik.Tip</td>
+                        <td>
+                            <a href="mailto:@djelatnik.Email">@djelatnik.Email</a>
+                        </td>
+                        <td>@djelatnik.DatumZaposlenja.ToShortDateString()</td>
+                        <td>
+                            @if (djelatnik.Projekti.Any())
+                            {
+                                <ul class="mb-0 small">
+                                    @foreach (var projekt in djelatnik.Projekti)
+                                    {
+                                        <li>@projekt.BrojProjekta - @projekt.Naziv</li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Nema dodijeljenih projekata</span>
+                            }
+                        </td>
+                        <td class="d-flex gap-2">
+                            <a asp-action="Edit" asp-route-id="@djelatnik.Id" class="btn btn-sm btn-outline-secondary">Uredi</a>
+                            <form asp-action="Delete" method="post" onsubmit="return confirm('Obrisati djelatnika i ukloniti ga s projekata?');">
+                                <input type="hidden" name="id" value="@djelatnik.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Obriši</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p class="text-muted">Još nema unesenih djelatnika.</p>
+}

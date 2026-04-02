@@ -1,4 +1,5 @@
-﻿@using PlameniciAplikacija.Models
+﻿@using System.Linq
+@using PlameniciAplikacija.Models
 @model IEnumerable<Project>
 @{
     ViewData["Title"] = "Projekti";
@@ -14,6 +15,33 @@
             "Gotovo" => "table-success",
             _ => string.Empty
         };
+    }
+
+    string GetPriorityClass(PrioritetNapomene prioritet) => prioritet switch
+    {
+        PrioritetNapomene.Nizak => "note-priority-low",
+        PrioritetNapomene.Srednji => "note-priority-medium",
+        PrioritetNapomene.Visok => "note-priority-high",
+        _ => string.Empty
+    };
+
+    string GetInitials(Djelatnik djelatnik)
+    {
+        var first = (djelatnik?.Ime ?? string.Empty).Trim();
+        var last = (djelatnik?.Prezime ?? string.Empty).Trim();
+        var result = string.Empty;
+
+        if (!string.IsNullOrEmpty(first))
+        {
+            result += char.ToUpperInvariant(first[0]);
+        }
+
+        if (!string.IsNullOrEmpty(last))
+        {
+            result += char.ToUpperInvariant(last[0]);
+        }
+
+        return string.IsNullOrEmpty(result) ? "?" : result;
     }
 }
 
@@ -63,6 +91,7 @@
                 <th>Realni rok</th>
                 <th>Kašnjenje (dana)</th>
                 <th>Napomena</th>
+                <th>Prioritet napomene</th>
                 <th>Prioritet</th>
                 <th>Akcije</th>
             </tr>
@@ -73,6 +102,11 @@
                 foreach (var projekt in Model)
                 {
                     var updateFormId = $"update-{projekt.Id}";
+                    var teamCollapseId = $"team-{projekt.Id}";
+                    var teamMembers = (projekt.Djelatnici ?? new List<Djelatnik>())
+                        .OrderBy(d => d.Prezime)
+                        .ThenBy(d => d.Ime)
+                        .ToList();
                     <tr>
                         <td>@projekt.BrojProjekta</td>
                         <td>@projekt.Naziv</td>
@@ -131,6 +165,22 @@
                         <td>
                             <input form="@updateFormId" type="text" name="napomena" value="@projekt.Napomena" class="form-control form-control-sm" />
                         </td>
+                        <td>
+                            <span class="note-priority-pill @GetPriorityClass(projekt.NapomenaPrioritet)">@projekt.NapomenaPrioritet</span>
+                            <select form="@updateFormId" name="napomenaPrioritet" class="form-select form-select-sm mt-1 note-priority-select @GetPriorityClass(projekt.NapomenaPrioritet)">
+                                @foreach (var prioritet in Enum.GetValues<PrioritetNapomene>())
+                                {
+                                    if (prioritet == projekt.NapomenaPrioritet)
+                                    {
+                                        <option value="@prioritet" selected>@prioritet</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@prioritet">@prioritet</option>
+                                    }
+                                }
+                            </select>
+                        </td>
                         <td class="text-center">
                             <div class="form-check form-switch d-inline-flex align-items-center justify-content-center">
                                 <input form="@updateFormId" class="form-check-input" type="checkbox" name="prioritet" value="true" @(projekt.Prioritet ? "checked" : string.Empty) />
@@ -138,6 +188,9 @@
                         </td>
                         <td>
                             <a asp-action="Details" asp-route-id="@projekt.Id" class="btn btn-sm btn-secondary mb-1">Otvori</a>
+                            <button type="button" class="btn btn-sm btn-outline-dark mb-1" data-bs-toggle="collapse" data-bs-target="#@teamCollapseId" aria-expanded="false" aria-controls="@teamCollapseId">
+                                Tim
+                            </button>
                             <form id="@updateFormId" asp-action="Update" method="post" class="mb-1">
                                 <input type="hidden" name="id" value="@projekt.Id" />
                                 <button type="submit" class="btn btn-sm btn-primary">Spremi</button>
@@ -148,12 +201,40 @@
                             </form>
                         </td>
                     </tr>
+                    <tr class="project-team-row">
+                        <td colspan="14" class="p-0 border-top-0">
+                            <div class="collapse team-collapse" id="@teamCollapseId">
+                                <div class="team-collapse-inner">
+                                    @if (teamMembers.Any())
+                                    {
+                                        <div class="team-badges">
+                                            @foreach (var djelatnik in teamMembers)
+                                            {
+                                                var initials = GetInitials(djelatnik);
+                                                <div class="team-badge">
+                                                    <div class="team-badge-initials">@initials</div>
+                                                    <div>
+                                                        <div class="fw-semibold">@djelatnik.Ime @djelatnik.Prezime</div>
+                                                        <div class="team-badge-meta">@djelatnik.RadnoMjesto · @djelatnik.Tip</div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Nema dodijeljenih djelatnika za ovaj projekt.</span>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
                 }
             }
             else
             {
                 <tr>
-                    <td colspan="12" class="text-center">Nema projekata za prikaz.</td>
+                    <td colspan="14" class="text-center">Nema projekata za prikaz.</td>
                 </tr>
             }
         </tbody>

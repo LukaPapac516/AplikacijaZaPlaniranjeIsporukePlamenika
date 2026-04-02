@@ -47,6 +47,7 @@ namespace PlameniciAplikacija.Models
             }
         }
         public string Napomena { get; set; } = string.Empty;
+        public PrioritetNapomene NapomenaPrioritet { get; set; } = PrioritetNapomene.Srednji;
 
         public bool Prioritet { get; set; } // Ako je true, prikazati poseban stil
 

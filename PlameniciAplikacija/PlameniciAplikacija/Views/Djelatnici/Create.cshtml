@@ -1,0 +1,14 @@
+@model PlameniciAplikacija.Models.Djelatnik
+@{
+    ViewData["Title"] = "Dodaj djelatnika";
+}
+
+<h2 class="mb-3">Novi djelatnik</h2>
+<form asp-action="Create" method="post" class="employee-form">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    @await Html.PartialAsync("_EmployeeForm", Model)
+    <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Spremi</button>
+        <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+    </div>
+</form>

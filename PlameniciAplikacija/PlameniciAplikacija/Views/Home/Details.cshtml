@@ -2,6 +2,13 @@
 @model Project
 @{
     ViewData["Title"] = $"Projekt {Model.BrojProjekta}";
+    string GetPriorityClass(PrioritetNapomene prioritet) => prioritet switch
+    {
+        PrioritetNapomene.Nizak => "note-priority-low",
+        PrioritetNapomene.Srednji => "note-priority-medium",
+        PrioritetNapomene.Visok => "note-priority-high",
+        _ => string.Empty
+    };
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -50,6 +57,10 @@
                     <dd class="col-sm-7">@Model.StatusProizvodnje</dd>
                     <dt class="col-sm-5">Prioritet</dt>
                     <dd class="col-sm-7">@(Model.Prioritet ? "Da" : "Ne")</dd>
+                    <dt class="col-sm-5">Prioritet napomene</dt>
+                    <dd class="col-sm-7">
+                        <span class="note-priority-pill @GetPriorityClass(Model.NapomenaPrioritet)">@Model.NapomenaPrioritet</span>
+                    </dd>
                     <dt class="col-sm-5">Napomena</dt>
                     <dd class="col-sm-7">@(!string.IsNullOrWhiteSpace(Model.Napomena) ? Model.Napomena : "-")</dd>
                 </dl>

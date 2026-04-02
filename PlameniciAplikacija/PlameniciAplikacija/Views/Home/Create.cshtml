@@ -59,6 +59,15 @@
         <textarea asp-for="Napomena" class="form-control"></textarea>
         <span asp-validation-for="Napomena" class="text-danger"></span>
     </div>
+    <div class="mb-3">
+        <label asp-for="NapomenaPrioritet" class="form-label">Prioritet napomene</label>
+        <select asp-for="NapomenaPrioritet" class="form-select" asp-items="Html.GetEnumSelectList<PlameniciAplikacija.Models.PrioritetNapomene>()"></select>
+        <span asp-validation-for="NapomenaPrioritet" class="text-danger"></span>
+    </div>
+    <div class="form-check form-switch mb-4">
+        <input asp-for="Prioritet" class="form-check-input" />
+        <label asp-for="Prioritet" class="form-check-label">Projekt je prioritetan</label>
+    </div>
     <button type="submit" class="btn btn-primary">Spremi</button>
     <a asp-action="Index" class="btn btn-secondary">Odustani</a>
 </form>
