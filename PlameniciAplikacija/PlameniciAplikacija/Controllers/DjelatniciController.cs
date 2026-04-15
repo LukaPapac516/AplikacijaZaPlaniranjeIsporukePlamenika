@@ -20,6 +20,19 @@ namespace PlameniciAplikacija.Controllers
         }
 
         [HttpGet]
+        public IActionResult Details(int id)
+        {
+            var djelatnik = AppData.Djelatnici.FirstOrDefault(d => d.Id == id);
+            if (djelatnik == null)
+            {
+                TempData["ErrorMessage"] = "Djelatnik nije pronađen.";
+                return RedirectToAction("Index");
+            }
+
+            return View(djelatnik);
+        }
+
+        [HttpGet]
         public IActionResult Create()
         {
             PopulateProjects();

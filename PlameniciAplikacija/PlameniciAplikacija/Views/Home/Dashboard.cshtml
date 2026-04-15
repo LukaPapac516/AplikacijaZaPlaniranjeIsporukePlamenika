@@ -1,0 +1,77 @@
+@using PlameniciAplikacija.Models
+@{
+    ViewData["Title"] = "Command Center";
+    var riskProjects = ViewBag.RiskProjects as List<Project> ?? new List<Project>();
+}
+
+<section class="cc-hero">
+    <div>
+        <p class="cc-eyebrow">Operativni centar</p>
+        <h1>Planiranje isporuke plamenika</h1>
+        <p class="cc-subtitle">Jedinstveni pregled kapaciteta, prioriteta i rizičnih projekata za današnji plan proizvodnje.</p>
+    </div>
+    <div class="cc-actions">
+        <a asp-controller="Home" asp-action="Create" class="btn btn-warning">+ Novi projekt</a>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-light">Otvori sve projekte</a>
+    </div>
+</section>
+
+<section class="cc-kpi-grid" aria-label="Ključni pokazatelji">
+    <article class="cc-kpi">
+        <p>Ukupno projekata</p>
+        <strong>@ViewBag.TotalProjects</strong>
+    </article>
+    <article class="cc-kpi">
+        <p>Prioritetnih projekata</p>
+        <strong>@ViewBag.PriorityProjects</strong>
+    </article>
+    <article class="cc-kpi">
+        <p>Kašnjenja</p>
+        <strong>@ViewBag.OverdueProjects</strong>
+    </article>
+    <article class="cc-kpi">
+        <p>Aktivnih kupaca</p>
+        <strong>@ViewBag.ActiveCustomers</strong>
+    </article>
+</section>
+
+<section class="cc-layout">
+    <aside class="cc-rail" aria-label="Brzi pristup">
+        <h3>Brzi pristup</h3>
+        <a asp-controller="Home" asp-action="Index" class="cc-rail-link">Projekti i statusi</a>
+        <a asp-controller="Kupci" asp-action="Index" class="cc-rail-link">Kupci i ugovori</a>
+        <a asp-controller="Djelatnici" asp-action="Index" class="cc-rail-link">Djelatnici i timovi</a>
+    </aside>
+
+    <main class="cc-board" aria-label="Rizični projekti">
+        <div class="cc-board-head">
+            <h3>Rizični i prioritetni projekti</h3>
+            <span>Top @riskProjects.Count</span>
+        </div>
+
+        @if (riskProjects.Any())
+        {
+            <div class="cc-cards">
+                @foreach (var projekt in riskProjects)
+                {
+                    <article class="cc-project-card @(projekt.Prioritet ? "is-priority" : "")">
+                        <header>
+                            <strong>@projekt.BrojProjekta</strong>
+                            <span>@projekt.StatusProizvodnje</span>
+                        </header>
+                        <h4>@projekt.Naziv</h4>
+                        <p>@(projekt.Kupac?.Naziv ?? "Kupac nije dodijeljen")</p>
+                        <footer>
+                            <span>Kašnjenje: @projekt.Kasnjenje dana</span>
+                            <a asp-controller="Home" asp-action="Details" asp-route-id="@projekt.Id">Detalji</a>
+                        </footer>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted mb-0">Trenutno nema rizičnih projekata za prikaz.</p>
+        }
+    </main>
+</section>

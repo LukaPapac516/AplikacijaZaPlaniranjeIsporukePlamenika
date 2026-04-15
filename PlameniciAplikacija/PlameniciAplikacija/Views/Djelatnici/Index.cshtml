@@ -1,12 +1,34 @@
 @model IEnumerable<PlameniciAplikacija.Models.Djelatnik>
 @{
     ViewData["Title"] = "Djelatnici";
+    var employees = Model?.ToList() ?? new List<PlameniciAplikacija.Models.Djelatnik>();
+    var assignedEmployees = employees.Count(d => d.Projekti != null && d.Projekti.Any());
+    var unassignedEmployees = employees.Count(d => d.Projekti == null || !d.Projekti.Any());
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0">Tim i djelatnici</h2>
-    <a asp-action="Create" class="btn btn-primary">Dodaj djelatnika</a>
-</div>
+<nav aria-label="Breadcrumb" class="app-breadcrumb">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Dashboard">Početna</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Djelatnici</li>
+    </ol>
+</nav>
+
+<section class="lc-header">
+    <div>
+        <p class="lc-eyebrow">Resursi i raspored</p>
+        <h2 class="lc-title">Tim i djelatnici</h2>
+        <p class="lc-subtitle">Prikaz raspoloživosti tima i dodjele projekata.</p>
+    </div>
+    <div class="lc-header-actions">
+        <a asp-action="Create" class="btn btn-primary">Dodaj djelatnika</a>
+    </div>
+</section>
+
+<section class="lc-kpi-row" aria-label="KPI djelatnika">
+    <article class="lc-kpi-chip"><span>Ukupno djelatnika</span><strong>@employees.Count</strong></article>
+    <article class="lc-kpi-chip"><span>Dodijeljeni</span><strong>@assignedEmployees</strong></article>
+    <article class="lc-kpi-chip"><span>Neraspoređeni</span><strong>@unassignedEmployees</strong></article>
+</section>
 
 @if (TempData["SuccessMessage"] is string successMessage)
 {
@@ -17,9 +39,14 @@
     <div class="alert alert-danger" role="alert">@errorMessage</div>
 }
 
-@if (Model != null && Model.Any())
+@if (employees.Any())
 {
-    <div class="table-responsive">
+    <div class="lc-table-shell">
+        <div class="lc-table-head">
+            <h3>Pregled djelatnika</h3>
+            <span class="lc-table-meta">Redaka: @employees.Count</span>
+        </div>
+    <div class="table-responsive lc-table-wrap">
         <table class="table table-hover align-middle">
             <thead class="table-light">
                 <tr>
@@ -33,10 +60,17 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var djelatnik in Model)
+                @foreach (var djelatnik in employees)
                 {
+                    var detailId = $"employee-details-{djelatnik.Id}";
                     <tr>
-                        <td class="fw-semibold">@djelatnik.Ime @djelatnik.Prezime</td>
+                        <td class="fw-semibold">
+                            <button class="btn btn-sm btn-link text-decoration-none p-0 me-2" type="button" data-bs-toggle="collapse" data-bs-target="#@detailId" aria-expanded="false" aria-controls="@detailId">
+                                <span aria-hidden="true">▸</span>
+                                <span class="visually-hidden">Prikaži detalje djelatnika @djelatnik.Ime @djelatnik.Prezime</span>
+                            </button>
+                            @djelatnik.Ime @djelatnik.Prezime
+                        </td>
                         <td>@djelatnik.RadnoMjesto</td>
                         <td>@djelatnik.Tip</td>
                         <td>
@@ -59,6 +93,7 @@
                             }
                         </td>
                         <td class="d-flex gap-2">
+                            <a asp-action="Details" asp-route-id="@djelatnik.Id" class="btn btn-sm btn-outline-dark">Otvori</a>
                             <a asp-action="Edit" asp-route-id="@djelatnik.Id" class="btn btn-sm btn-outline-secondary">Uredi</a>
                             <form asp-action="Delete" method="post" onsubmit="return confirm('Obrisati djelatnika i ukloniti ga s projekata?');">
                                 <input type="hidden" name="id" value="@djelatnik.Id" />
@@ -66,9 +101,26 @@
                             </form>
                         </td>
                     </tr>
+                    <tr class="border-top-0">
+                        <td colspan="7" class="pt-0 pb-0 border-top-0">
+                            <div class="collapse" id="@detailId">
+                                <div class="card card-body bg-light border-0 mb-2">
+                                    <div class="row g-2 small">
+                                        <div class="col-md-6"><strong>Ime:</strong> @djelatnik.Ime</div>
+                                        <div class="col-md-6"><strong>Prezime:</strong> @djelatnik.Prezime</div>
+                                        <div class="col-md-6"><strong>Email:</strong> @djelatnik.Email</div>
+                                        <div class="col-md-6"><strong>Radno mjesto:</strong> @djelatnik.RadnoMjesto</div>
+                                        <div class="col-md-6"><strong>Tip:</strong> @djelatnik.Tip</div>
+                                        <div class="col-md-6"><strong>Datum zaposlenja:</strong> @djelatnik.DatumZaposlenja.ToShortDateString()</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>
+    </div>
     </div>
 }
 else

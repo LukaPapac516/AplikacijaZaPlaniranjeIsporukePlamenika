@@ -3,6 +3,10 @@
 @model IEnumerable<Project>
 @{
     ViewData["Title"] = "Projekti";
+    var projects = Model?.ToList() ?? new List<Project>();
+    var priorityCount = projects.Count(p => p.Prioritet);
+    var delayedCount = projects.Count(p => p.Kasnjenje > 0);
+    var activeCustomers = projects.Where(p => p.Kupac != null).Select(p => p.Kupac!.Id).Distinct().Count();
 
     string GetStatusColor(string status)
     {
@@ -45,7 +49,30 @@
     }
 }
 
-<h2 class="mb-3">Projekti</h2>
+<nav aria-label="Breadcrumb" class="app-breadcrumb">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Dashboard">Početna</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Projekti</li>
+    </ol>
+</nav>
+
+<section class="lc-header lc-header-projects">
+    <div>
+        <p class="lc-eyebrow">Operativna lista</p>
+        <h2 class="lc-title">Projekti</h2>
+        <p class="lc-subtitle">Praćenje statusa proizvodnje, rokova i prioriteta na jednom mjestu.</p>
+    </div>
+    <div class="lc-header-actions">
+        <a asp-action="Create" class="btn btn-warning">+ Novi projekt</a>
+    </div>
+</section>
+
+<section class="lc-kpi-row" aria-label="KPI projekata">
+    <article class="lc-kpi-chip"><span>Ukupno</span><strong>@projects.Count</strong></article>
+    <article class="lc-kpi-chip"><span>Prioritetni</span><strong>@priorityCount</strong></article>
+    <article class="lc-kpi-chip"><span>Kašnjenje</span><strong>@delayedCount</strong></article>
+    <article class="lc-kpi-chip"><span>Aktivni kupci</span><strong>@activeCustomers</strong></article>
+</section>
 
 @if (TempData["SuccessMessage"] is string successMessage)
 {
@@ -71,12 +98,14 @@
     <div class="col-md-2">
         <button type="submit" class="btn btn-primary w-100">Filtriraj</button>
     </div>
-    <div class="col-md-2">
-        <a asp-action="Create" class="btn btn-success w-100">Novi projekt</a>
-    </div>
 </form>
 
-<div class="table-responsive">
+<div class="lc-table-shell">
+    <div class="lc-table-head">
+        <h3>Pregled projekata</h3>
+        <span class="lc-table-meta">Redaka: @projects.Count</span>
+    </div>
+<div class="table-responsive lc-table-wrap">
     <table class="table table-striped table-bordered align-middle">
         <thead class="table-light">
             <tr>
@@ -97,9 +126,9 @@
             </tr>
         </thead>
         <tbody>
-            @if (Model != null && Model.Any())
+            @if (projects.Any())
             {
-                foreach (var projekt in Model)
+                foreach (var projekt in projects)
                 {
                     var updateFormId = $"update-{projekt.Id}";
                     var teamCollapseId = $"team-{projekt.Id}";
@@ -239,4 +268,5 @@
             }
         </tbody>
     </table>
+</div>
 </div>

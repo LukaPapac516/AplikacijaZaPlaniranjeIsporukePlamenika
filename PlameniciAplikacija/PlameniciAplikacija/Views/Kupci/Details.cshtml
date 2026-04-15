@@ -1,0 +1,82 @@
+@model PlameniciAplikacija.Models.Kupac
+@{
+    ViewData["Title"] = $"Kupac {Model.Naziv}";
+}
+
+<nav aria-label="Breadcrumb" class="app-breadcrumb">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Dashboard">Početna</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Kupci" asp-action="Index">Kupci</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Detalji</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Kupac: @Model.Naziv</h2>
+    <a asp-action="Index" class="btn btn-link">&larr; Natrag na listu</a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Naziv</dt>
+                    <dd class="col-sm-7">@Model.Naziv</dd>
+                    <dt class="col-sm-5">Tip kupca</dt>
+                    <dd class="col-sm-7">@Model.Tip</dd>
+                    <dt class="col-sm-5">OIB</dt>
+                    <dd class="col-sm-7">@Model.OIB</dd>
+                    <dt class="col-sm-5">Datum unosa</dt>
+                    <dd class="col-sm-7">@Model.DatumUnosa.ToShortDateString()</dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Kontakt osoba</dt>
+                    <dd class="col-sm-7">@Model.KontaktOsoba</dd>
+                    <dt class="col-sm-5">Email</dt>
+                    <dd class="col-sm-7">@Model.Email</dd>
+                    <dt class="col-sm-5">Telefon</dt>
+                    <dd class="col-sm-7">@Model.Telefon</dd>
+                    <dt class="col-sm-5">Adresa</dt>
+                    <dd class="col-sm-7">@Model.Adresa, @Model.Grad</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h4>Povezani projekti</h4>
+@if (Model.Projekti != null && Model.Projekti.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Broj projekta</th>
+                    <th>Naziv</th>
+                    <th>Status proizvodnje</th>
+                    <th>Akcija</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var projekt in Model.Projekti.OrderBy(p => p.BrojProjekta))
+                {
+                    <tr>
+                        <td>@projekt.BrojProjekta</td>
+                        <td>@projekt.Naziv</td>
+                        <td>@projekt.StatusProizvodnje</td>
+                        <td>
+                            <a asp-controller="Home" asp-action="Details" asp-route-id="@projekt.Id" class="btn btn-sm btn-outline-primary">Otvori projekt</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p class="text-muted">Kupac trenutačno nema povezanih projekata.</p>
+}

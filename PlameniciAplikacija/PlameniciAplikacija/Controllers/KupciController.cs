@@ -15,6 +15,19 @@ namespace PlameniciAplikacija.Controllers
         }
 
         [HttpGet]
+        public IActionResult Details(int id)
+        {
+            var kupac = AppData.Kupci.FirstOrDefault(k => k.Id == id);
+            if (kupac == null)
+            {
+                TempData["ErrorMessage"] = "Kupac nije pronađen.";
+                return RedirectToAction("Index");
+            }
+
+            return View(kupac);
+        }
+
+        [HttpGet]
         public IActionResult Create()
         {
             return View(new Kupac

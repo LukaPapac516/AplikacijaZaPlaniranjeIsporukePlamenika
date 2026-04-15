@@ -36,6 +36,30 @@ namespace PlameniciAplikacija.Controllers
             return null;
         }
 
+        [HttpGet]
+        public IActionResult Dashboard()
+        {
+            var projekti = AppData.Projekti;
+            var today = DateTime.Today;
+
+            ViewBag.TotalProjects = projekti.Count;
+            ViewBag.PriorityProjects = projekti.Count(p => p.Prioritet);
+            ViewBag.OverdueProjects = projekti.Count(p =>
+                p.OcekivaniRokIsporuke.HasValue &&
+                p.OcekivaniRokIsporuke.Value.Date < today &&
+                p.StatusProizvodnje != StatusProizvodnje.Gotovo);
+            ViewBag.ActiveCustomers = AppData.Kupci.Count(k => k.Projekti != null && k.Projekti.Any());
+
+            ViewBag.RiskProjects = projekti
+                .Where(p => p.Prioritet || p.Kasnjenje > 0 || p.StatusProizvodnje == StatusProizvodnje.NijeUProizvodnji)
+                .OrderByDescending(p => p.Prioritet)
+                .ThenByDescending(p => p.Kasnjenje)
+                .Take(6)
+                .ToList();
+
+            return View();
+        }
+
         public IActionResult Index(string? search)
         {
             var projekti = AppData.Projekti.AsEnumerable();

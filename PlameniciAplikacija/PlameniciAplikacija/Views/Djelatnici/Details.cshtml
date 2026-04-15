@@ -1,0 +1,82 @@
+@model PlameniciAplikacija.Models.Djelatnik
+@{
+    ViewData["Title"] = $"Djelatnik {Model.Ime} {Model.Prezime}";
+}
+
+<nav aria-label="Breadcrumb" class="app-breadcrumb">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Dashboard">Početna</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Djelatnici" asp-action="Index">Djelatnici</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Detalji</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Djelatnik: @Model.Ime @Model.Prezime</h2>
+    <a asp-action="Index" class="btn btn-link">&larr; Natrag na listu</a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Ime</dt>
+                    <dd class="col-sm-7">@Model.Ime</dd>
+                    <dt class="col-sm-5">Prezime</dt>
+                    <dd class="col-sm-7">@Model.Prezime</dd>
+                    <dt class="col-sm-5">Tip</dt>
+                    <dd class="col-sm-7">@Model.Tip</dd>
+                    <dt class="col-sm-5">Datum zaposlenja</dt>
+                    <dd class="col-sm-7">@Model.DatumZaposlenja.ToShortDateString()</dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Radno mjesto</dt>
+                    <dd class="col-sm-7">@Model.RadnoMjesto</dd>
+                    <dt class="col-sm-5">Email</dt>
+                    <dd class="col-sm-7">
+                        <a href="mailto:@Model.Email">@Model.Email</a>
+                    </dd>
+                    <dt class="col-sm-5">Broj projekata</dt>
+                    <dd class="col-sm-7">@(Model.Projekti?.Count ?? 0)</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h4>Dodijeljeni projekti</h4>
+@if (Model.Projekti != null && Model.Projekti.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Broj projekta</th>
+                    <th>Naziv</th>
+                    <th>Status proizvodnje</th>
+                    <th>Akcija</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var projekt in Model.Projekti.OrderBy(p => p.BrojProjekta))
+                {
+                    <tr>
+                        <td>@projekt.BrojProjekta</td>
+                        <td>@projekt.Naziv</td>
+                        <td>@projekt.StatusProizvodnje</td>
+                        <td>
+                            <a asp-controller="Home" asp-action="Details" asp-route-id="@projekt.Id" class="btn btn-sm btn-outline-primary">Otvori projekt</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p class="text-muted">Djelatnik trenutačno nije dodijeljen ni na jedan projekt.</p>
+}
