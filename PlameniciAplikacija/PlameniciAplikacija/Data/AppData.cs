@@ -274,7 +274,9 @@ namespace PlameniciAplikacija.Data
         {
             foreach (var projekt in Projekti)
             {
-                projekt.Djelatnici.RemoveAll(d => d.Id == djelatnik.Id);
+                var toRemove = projekt.Djelatnici.Where(d => d.Id == djelatnik.Id).ToList();
+                foreach (var item in toRemove)
+                    projekt.Djelatnici.Remove(item);
             }
 
             djelatnik.Projekti.Clear();

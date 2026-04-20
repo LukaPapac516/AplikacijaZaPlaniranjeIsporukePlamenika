@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace PlameniciAplikacija.Models
 {
@@ -25,6 +26,15 @@ namespace PlameniciAplikacija.Models
         public DateTime? DatumPlaniranja { get; set; }
         public DateTime? DatumZavrsetka { get; set; }
         public StatusStavke Status { get; set; }
+        [StringLength(500)]
         public string Napomena { get; set; }
+        
+        // Foreign Keys
+        [Required]
+        public int ProjektId { get; set; }
+        public virtual Project Projekt { get; set; }
+        
+        public int? RadniNalogId { get; set; }
+        public virtual RadniNalog RadniNalog { get; set; }
     }
 }

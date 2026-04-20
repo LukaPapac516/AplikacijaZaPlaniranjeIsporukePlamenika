@@ -235,7 +235,9 @@ namespace PlameniciAplikacija.Controllers
             {
                 if (projekt.Kupac != null)
                 {
-                    projekt.Kupac.Projekti.RemoveAll(p => p.Id == projekt.Id);
+                    var toRemove = projekt.Kupac.Projekti.Where(p => p.Id == projekt.Id).ToList();
+                    foreach (var item in toRemove)
+                        projekt.Kupac.Projekti.Remove(item);
                 }
                 TempData["ErrorMessage"] = "Projekt nije pronađen.";
                 return RedirectToAction("Index");
