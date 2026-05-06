@@ -1,0 +1,112 @@
+@using PlameniciAplikacija.Models
+@model IEnumerable<RadniNalog>
+@{
+    ViewData["Title"] = "Radni nalozi";
+    var items = Model?.ToList() ?? new List<RadniNalog>();
+}
+
+<nav aria-label="Breadcrumb" class="app-breadcrumb">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Dashboard">Pocetna</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Radni nalozi</li>
+    </ol>
+</nav>
+
+<section class="lc-header">
+    <div>
+        <p class="lc-eyebrow">Operativna izvedba</p>
+        <h2 class="lc-title">Radni nalozi</h2>
+        <p class="lc-subtitle">Pregled naloga po statusima, rokovima i povezanom projektu.</p>
+    </div>
+</section>
+
+<section class="lc-kpi-row" aria-label="KPI radnih naloga">
+    <article class="lc-kpi-chip"><span>Ukupno</span><strong>@ViewBag.Total</strong></article>
+    <article class="lc-kpi-chip"><span>Otvoreni</span><strong>@ViewBag.Open</strong></article>
+    <article class="lc-kpi-chip"><span>U tijeku</span><strong>@ViewBag.Active</strong></article>
+    <article class="lc-kpi-chip"><span>Zatvoreni</span><strong>@ViewBag.Closed</strong></article>
+</section>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="alert alert-success" role="alert">@successMessage</div>
+}
+@if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div class="alert alert-danger" role="alert">@errorMessage</div>
+}
+
+<form method="get" asp-action="Index" class="row g-2 mb-3">
+    <div class="col-md-5">
+        <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Pretraga: oznaka, opis ili projekt" />
+    </div>
+    <div class="col-md-3">
+        <select name="status" class="form-select">
+            <option value="">Svi statusi</option>
+            @foreach (var s in Enum.GetValues<StatusNaloga>())
+            {
+                if (ViewBag.SelectedStatus != null && s.Equals(ViewBag.SelectedStatus))
+                {
+                    <option value="@s" selected>@s</option>
+                }
+                else
+                {
+                    <option value="@s">@s</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Filtriraj</button>
+    </div>
+    <div class="col-md-2">
+        <a asp-action="Index" class="btn btn-outline-secondary w-100">Reset</a>
+    </div>
+</form>
+
+<div class="lc-table-shell">
+    <div class="lc-table-head">
+        <h3>Lista naloga</h3>
+        <span class="lc-table-meta">Redaka: @items.Count</span>
+    </div>
+    <div class="table-responsive lc-table-wrap">
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Oznaka</th>
+                    <th>Projekt</th>
+                    <th>Opis</th>
+                    <th>Datum otvaranja</th>
+                    <th>Datum zatvaranja</th>
+                    <th>Status</th>
+                    <th>Akcija</th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (items.Any())
+            {
+                foreach (var nalog in items)
+                {
+                    <tr>
+                        <td class="fw-semibold">@nalog.OznakaNaloga</td>
+                        <td>@(nalog.Projekt != null ? $"{nalog.Projekt.BrojProjekta} - {nalog.Projekt.Naziv}" : "-")</td>
+                        <td>@nalog.Opis</td>
+                        <td>@nalog.DatumOtvaranja.ToShortDateString()</td>
+                        <td>@nalog.DatumZatvaranja?.ToShortDateString()</td>
+                        <td>@nalog.Status</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@nalog.Id" class="btn btn-sm btn-outline-primary">Uredi</a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center text-muted">Nema radnih naloga za prikaz.</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

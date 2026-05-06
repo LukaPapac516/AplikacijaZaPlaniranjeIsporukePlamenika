@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PlameniciAplikacija.Data;
 using PlameniciAplikacija.Models;
 using System.Diagnostics;
@@ -10,10 +11,20 @@ namespace PlameniciAplikacija.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly AppDbContext _context;
+        private static readonly string[] StandardneOperacije =
+        {
+            "Priprema materijala",
+            "Bravari i zavarivači",
+            "Farbanje",
+            "Ožičavanje",
+            "Završna montaža"
+        };
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, AppDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         private static string? ValidateDateOrder(DateTime datumUnosa, DateTime? ocekivaniRok, DateTime? realniRok)
@@ -39,7 +50,9 @@ namespace PlameniciAplikacija.Controllers
         [HttpGet]
         public IActionResult Dashboard()
         {
-            var projekti = AppData.Projekti;
+            var projekti = _context.Projekti
+                .Include(p => p.Kupac)
+                .ToList();
             var today = DateTime.Today;
 
             ViewBag.TotalProjects = projekti.Count;
@@ -48,7 +61,11 @@ namespace PlameniciAplikacija.Controllers
                 p.OcekivaniRokIsporuke.HasValue &&
                 p.OcekivaniRokIsporuke.Value.Date < today &&
                 p.StatusProizvodnje != StatusProizvodnje.Gotovo);
-            ViewBag.ActiveCustomers = AppData.Kupci.Count(k => k.Projekti != null && k.Projekti.Any());
+            ViewBag.ActiveCustomers = projekti
+                .Where(p => p.KupacId.HasValue)
+                .Select(p => p.KupacId!.Value)
+                .Distinct()
+                .Count();
 
             ViewBag.RiskProjects = projekti
                 .Where(p => p.Prioritet || p.Kasnjenje > 0 || p.StatusProizvodnje == StatusProizvodnje.NijeUProizvodnji)
@@ -62,7 +79,10 @@ namespace PlameniciAplikacija.Controllers
 
         public IActionResult Index(string? search)
         {
-            var projekti = AppData.Projekti.AsEnumerable();
+            var projekti = _context.Projekti
+                .Include(p => p.Kupac)
+                .Include(p => p.Djelatnici)
+                .AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -93,7 +113,7 @@ namespace PlameniciAplikacija.Controllers
         [HttpPost]
         public IActionResult Update(int id, StatusTriStanja statusPripremeRada, StatusTriStanja statusLansiranja, StatusProizvodnje statusProizvodnje, DateTime? realniRokIsporuke, string? napomena, bool prioritet, PrioritetNapomene napomenaPrioritet)
         {
-            var projekt = AppData.Projekti.FirstOrDefault(p => p.Id == id);
+            var projekt = _context.Projekti.FirstOrDefault(p => p.Id == id);
             if (projekt == null)
             {
                 TempData["ErrorMessage"] = "Projekt nije pronađen.";
@@ -114,6 +134,7 @@ namespace PlameniciAplikacija.Controllers
             projekt.Napomena = napomena ?? string.Empty;
             projekt.Prioritet = prioritet;
             projekt.NapomenaPrioritet = napomenaPrioritet;
+            _context.SaveChanges();
 
             TempData["SuccessMessage"] = "Projekt ažuriran";
             return RedirectToAction("Index");
@@ -122,10 +143,11 @@ namespace PlameniciAplikacija.Controllers
         [HttpPost]
         public IActionResult Delete(int id)
         {
-            var projekt = AppData.Projekti.FirstOrDefault(p => p.Id == id);
+            var projekt = _context.Projekti.FirstOrDefault(p => p.Id == id);
             if (projekt != null)
             {
-                AppData.Projekti.Remove(projekt);
+                _context.Projekti.Remove(projekt);
+                _context.SaveChanges();
                 TempData["SuccessMessage"] = "Projekt obrisan";
             }
             else
@@ -139,7 +161,9 @@ namespace PlameniciAplikacija.Controllers
         [HttpPost]
         public IActionResult UpdateRadniNalog(int projektId, int nalogId, DateTime datumOtvaranja, DateTime? datumZatvaranja, StatusNaloga status, string? opis)
         {
-            var projekt = AppData.Projekti.FirstOrDefault(p => p.Id == projektId);
+            var projekt = _context.Projekti
+                .Include(p => p.RadniNalozi)
+                .FirstOrDefault(p => p.Id == projektId);
             if (projekt == null)
             {
                 TempData["ErrorMessage"] = "Projekt nije pronađen.";
@@ -163,7 +187,8 @@ namespace PlameniciAplikacija.Controllers
             nalog.DatumZatvaranja = datumZatvaranja;
             nalog.Status = status;
             nalog.Opis = opis ?? string.Empty;
-            AppData.SyncProjectStatuses(projekt);
+            SyncProjectStatuses(projekt);
+            _context.SaveChanges();
 
             TempData["SuccessMessage"] = "Radni nalog ažuriran.";
             return RedirectToAction("Details", new { id = projektId });
@@ -172,7 +197,9 @@ namespace PlameniciAplikacija.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.Kupci = AppData.Kupci;
+            ViewBag.Kupci = _context.Kupci
+                .OrderBy(k => k.Naziv)
+                .ToList();
             return View(new Project
             {
                 DatumUnosa = DateTime.Today,
@@ -196,8 +223,8 @@ namespace PlameniciAplikacija.Controllers
                 ModelState.AddModelError(nameof(projekt.KupacId), "Odaberite kupca.");
             }
 
-            projekt.Kupac = AppData.Kupci.FirstOrDefault(k => k.Id == projekt.KupacId);
-            if (projekt.Kupac == null)
+            var kupacExists = projekt.KupacId.HasValue && _context.Kupci.Any(k => k.Id == projekt.KupacId.Value);
+            if (!kupacExists)
             {
                 ModelState.AddModelError(nameof(projekt.KupacId), "Odaberite kupca.");
             }
@@ -210,35 +237,37 @@ namespace PlameniciAplikacija.Controllers
 
             if (ModelState.IsValid)
             {
-                projekt.Id = AppData.Projekti.Count > 0 ? AppData.Projekti.Max(p => p.Id) + 1 : 1;
                 projekt.Napomena ??= string.Empty;
-                projekt.RadniNalozi = AppData.BuildStandardRadniNalozi(projekt);
-                AppData.SyncProjectStatuses(projekt);
-                AppData.Projekti.Add(projekt);
-                if (projekt.Kupac != null && !projekt.Kupac.Projekti.Any(p => p.Id == projekt.Id))
-                {
-                    projekt.Kupac.Projekti.Add(projekt);
-                }
+                _context.Projekti.Add(projekt);
+                _context.SaveChanges();
+
+                var radniNalozi = BuildStandardRadniNalozi(projekt);
+                _context.RadniNalozi.AddRange(radniNalozi);
+                projekt.RadniNalozi = radniNalozi;
+                SyncProjectStatuses(projekt);
+                _context.SaveChanges();
+
                 TempData["SuccessMessage"] = "Projekt stvoren";
                 return RedirectToAction("Index");
             }
 
-            ViewBag.Kupci = AppData.Kupci;
+            ViewBag.Kupci = _context.Kupci
+                .OrderBy(k => k.Naziv)
+                .ToList();
             return View(projekt);
         }
 
         [HttpGet]
         public IActionResult Details(int id)
         {
-            var projekt = AppData.Projekti.FirstOrDefault(p => p.Id == id);
+            var projekt = _context.Projekti
+                .Include(p => p.Kupac)
+                .Include(p => p.RadniNalozi)
+                .Include(p => p.StavkeProizvodnje)
+                .FirstOrDefault(p => p.Id == id);
+
             if (projekt == null)
             {
-                if (projekt.Kupac != null)
-                {
-                    var toRemove = projekt.Kupac.Projekti.Where(p => p.Id == projekt.Id).ToList();
-                    foreach (var item in toRemove)
-                        projekt.Kupac.Projekti.Remove(item);
-                }
                 TempData["ErrorMessage"] = "Projekt nije pronađen.";
                 return RedirectToAction("Index");
             }
@@ -255,6 +284,99 @@ namespace PlameniciAplikacija.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        private static List<RadniNalog> BuildStandardRadniNalozi(Project projekt)
+        {
+            var radniNalozi = new List<RadniNalog>();
+
+            for (int i = 0; i < StandardneOperacije.Length; i++)
+            {
+                radniNalozi.Add(new RadniNalog
+                {
+                    OznakaNaloga = $"{projekt.BrojProjekta}-{i + 1:00}",
+                    DatumOtvaranja = projekt.DatumUnosa.AddDays(i),
+                    Status = i == 0 ? StatusNaloga.U_Tijeku : StatusNaloga.Otvoren,
+                    Opis = StandardneOperacije[i],
+                    ProjektId = projekt.Id
+                });
+            }
+
+            return radniNalozi;
+        }
+
+        private static void SyncProjectStatuses(Project projekt)
+        {
+            if (projekt.RadniNalozi == null || projekt.RadniNalozi.Count == 0)
+            {
+                return;
+            }
+
+            var priprema = FindNalog(projekt, "priprema");
+            if (priprema != null)
+            {
+                projekt.StatusPripremeRada = MapTriState(priprema.Status);
+            }
+
+            var lansiranje = FindNalog(projekt, "bravari", "zavariva");
+            if (lansiranje != null)
+            {
+                projekt.StatusLansiranja = MapTriState(lansiranje.Status);
+            }
+
+            UpdateProizvodnjaStatus(projekt);
+        }
+
+        private static StatusTriStanja MapTriState(StatusNaloga status) => status switch
+        {
+            StatusNaloga.Otvoren => StatusTriStanja.NijeStartano,
+            StatusNaloga.U_Tijeku => StatusTriStanja.Startano,
+            StatusNaloga.Zatvoren => StatusTriStanja.Zavrseno,
+            _ => StatusTriStanja.NijeStartano
+        };
+
+        private static RadniNalog? FindNalog(Project projekt, params string[] keywords)
+        {
+            var loweredKeywords = keywords.Select(k => k.ToLowerInvariant()).ToArray();
+
+            return projekt.RadniNalozi.FirstOrDefault(n =>
+            {
+                var opis = n.Opis?.ToLowerInvariant() ?? string.Empty;
+                return loweredKeywords.Any(k => opis.Contains(k));
+            });
+        }
+
+        private static void UpdateProizvodnjaStatus(Project projekt)
+        {
+            var montaza = FindNalog(projekt, "monta");
+            if (montaza != null && montaza.Status == StatusNaloga.Zatvoren)
+            {
+                projekt.StatusProizvodnje = StatusProizvodnje.Gotovo;
+                return;
+            }
+
+            var ozicavanje = FindNalog(projekt, "ozic", "ožič", "ozi");
+            if (ozicavanje != null && ozicavanje.Status != StatusNaloga.Otvoren)
+            {
+                projekt.StatusProizvodnje = StatusProizvodnje.Elektricari;
+                return;
+            }
+
+            var farbanje = FindNalog(projekt, "farban");
+            if (farbanje != null && farbanje.Status != StatusNaloga.Otvoren)
+            {
+                projekt.StatusProizvodnje = StatusProizvodnje.Farbanje;
+                return;
+            }
+
+            var bravari = FindNalog(projekt, "bravari", "zavariva");
+            if (bravari != null && bravari.Status != StatusNaloga.Otvoren)
+            {
+                projekt.StatusProizvodnje = StatusProizvodnje.BravariZavarivaci;
+                return;
+            }
+
+            projekt.StatusProizvodnje = StatusProizvodnje.NijeUProizvodnji;
         }
     }
 }

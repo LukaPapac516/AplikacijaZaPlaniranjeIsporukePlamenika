@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PlameniciAplikacija.Data;
 using PlameniciAplikacija.Models;
 using System;
@@ -9,9 +10,17 @@ namespace PlameniciAplikacija.Controllers
 {
     public class DjelatniciController : Controller
     {
+        private readonly AppDbContext _context;
+
+        public DjelatniciController(AppDbContext context)
+        {
+            _context = context;
+        }
+
         public IActionResult Index()
         {
-            var djelatnici = AppData.Djelatnici
+            var djelatnici = _context.Djelatnici
+                .Include(d => d.Projekti)
                 .OrderBy(d => d.Prezime)
                 .ThenBy(d => d.Ime)
                 .ToList();
@@ -22,7 +31,9 @@ namespace PlameniciAplikacija.Controllers
         [HttpGet]
         public IActionResult Details(int id)
         {
-            var djelatnik = AppData.Djelatnici.FirstOrDefault(d => d.Id == id);
+            var djelatnik = _context.Djelatnici
+                .Include(d => d.Projekti)
+                .FirstOrDefault(d => d.Id == id);
             if (djelatnik == null)
             {
                 TempData["ErrorMessage"] = "Djelatnik nije pronađen.";
@@ -55,9 +66,17 @@ namespace PlameniciAplikacija.Controllers
                 return View(djelatnik);
             }
 
-            djelatnik.Id = AppData.Djelatnici.Any() ? AppData.Djelatnici.Max(d => d.Id) + 1 : 1;
-            AppData.Djelatnici.Add(djelatnik);
-            AppData.AssignProjectsToEmployee(djelatnik, projektiIds ?? Enumerable.Empty<int>());
+            var selectedIds = (projektiIds ?? Enumerable.Empty<int>()).ToHashSet();
+            var selectedProjects = _context.Projekti
+                .Where(p => selectedIds.Contains(p.Id))
+                .ToList();
+            foreach (var projekt in selectedProjects)
+            {
+                djelatnik.Projekti.Add(projekt);
+            }
+
+            _context.Djelatnici.Add(djelatnik);
+            _context.SaveChanges();
             TempData["SuccessMessage"] = "Djelatnik dodan.";
             return RedirectToAction("Index");
         }
@@ -65,7 +84,9 @@ namespace PlameniciAplikacija.Controllers
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            var djelatnik = AppData.Djelatnici.FirstOrDefault(d => d.Id == id);
+            var djelatnik = _context.Djelatnici
+                .Include(d => d.Projekti)
+                .FirstOrDefault(d => d.Id == id);
             if (djelatnik == null)
             {
                 TempData["ErrorMessage"] = "Djelatnik nije pronađen.";
@@ -79,7 +100,9 @@ namespace PlameniciAplikacija.Controllers
         [HttpPost]
         public IActionResult Edit(int id, Djelatnik updated, List<int>? projektiIds)
         {
-            var djelatnik = AppData.Djelatnici.FirstOrDefault(d => d.Id == id);
+            var djelatnik = _context.Djelatnici
+                .Include(d => d.Projekti)
+                .FirstOrDefault(d => d.Id == id);
             if (djelatnik == null)
             {
                 TempData["ErrorMessage"] = "Djelatnik nije pronađen.";
@@ -106,7 +129,18 @@ namespace PlameniciAplikacija.Controllers
             djelatnik.Tip = updated.Tip;
             djelatnik.DatumZaposlenja = updated.DatumZaposlenja;
 
-            AppData.AssignProjectsToEmployee(djelatnik, projektiIds ?? Enumerable.Empty<int>());
+            var selectedIds = (projektiIds ?? Enumerable.Empty<int>()).ToHashSet();
+            var selectedProjects = _context.Projekti
+                .Where(p => selectedIds.Contains(p.Id))
+                .ToList();
+
+            djelatnik.Projekti.Clear();
+            foreach (var projekt in selectedProjects)
+            {
+                djelatnik.Projekti.Add(projekt);
+            }
+
+            _context.SaveChanges();
             TempData["SuccessMessage"] = "Djelatnik ažuriran.";
             return RedirectToAction("Index");
         }
@@ -114,15 +148,18 @@ namespace PlameniciAplikacija.Controllers
         [HttpPost]
         public IActionResult Delete(int id)
         {
-            var djelatnik = AppData.Djelatnici.FirstOrDefault(d => d.Id == id);
+            var djelatnik = _context.Djelatnici
+                .Include(d => d.Projekti)
+                .FirstOrDefault(d => d.Id == id);
             if (djelatnik == null)
             {
                 TempData["ErrorMessage"] = "Djelatnik nije pronađen.";
                 return RedirectToAction("Index");
             }
 
-            AppData.RemoveEmployeeFromProjects(djelatnik);
-            AppData.Djelatnici.Remove(djelatnik);
+            djelatnik.Projekti.Clear();
+            _context.Djelatnici.Remove(djelatnik);
+            _context.SaveChanges();
             TempData["SuccessMessage"] = "Djelatnik obrisan.";
             return RedirectToAction("Index");
         }
@@ -130,7 +167,8 @@ namespace PlameniciAplikacija.Controllers
         private void PopulateProjects(IEnumerable<int>? selectedProjectIds = null)
         {
             var selected = selectedProjectIds?.ToHashSet() ?? new HashSet<int>();
-            ViewBag.Projekti = AppData.Projekti
+            ViewBag.Projekti = _context.Projekti
+                .OrderBy(p => p.BrojProjekta)
                 .Select(p => new Project
                 {
                     Id = p.Id,

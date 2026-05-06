@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PlameniciAplikacija.Data;
 using PlameniciAplikacija.Models;
 using System;
@@ -8,16 +9,28 @@ namespace PlameniciAplikacija.Controllers
 {
     public class KupciController : Controller
     {
+        private readonly AppDbContext _context;
+
+        public KupciController(AppDbContext context)
+        {
+            _context = context;
+        }
+
         public IActionResult Index()
         {
-            var kupci = AppData.Kupci.OrderBy(k => k.Naziv).ToList();
+            var kupci = _context.Kupci
+                .Include(k => k.Projekti)
+                .OrderBy(k => k.Naziv)
+                .ToList();
             return View(kupci);
         }
 
         [HttpGet]
         public IActionResult Details(int id)
         {
-            var kupac = AppData.Kupci.FirstOrDefault(k => k.Id == id);
+            var kupac = _context.Kupci
+                .Include(k => k.Projekti)
+                .FirstOrDefault(k => k.Id == id);
             if (kupac == null)
             {
                 TempData["ErrorMessage"] = "Kupac nije pronađen.";
@@ -57,8 +70,8 @@ namespace PlameniciAplikacija.Controllers
                 return View(kupac);
             }
 
-            kupac.Id = AppData.Kupci.Any() ? AppData.Kupci.Max(k => k.Id) + 1 : 1;
-            AppData.Kupci.Add(kupac);
+            _context.Kupci.Add(kupac);
+            _context.SaveChanges();
             TempData["SuccessMessage"] = "Kupac dodan.";
             return RedirectToAction("Index");
         }
@@ -66,21 +79,22 @@ namespace PlameniciAplikacija.Controllers
         [HttpPost]
         public IActionResult Delete(int id)
         {
-            var kupac = AppData.Kupci.FirstOrDefault(k => k.Id == id);
+            var kupac = _context.Kupci.FirstOrDefault(k => k.Id == id);
             if (kupac == null)
             {
                 TempData["ErrorMessage"] = "Kupac nije pronađen.";
                 return RedirectToAction("Index");
             }
 
-            foreach (var projekt in AppData.Projekti.Where(p => p.KupacId == id))
+            var projektiKupca = _context.Projekti.Where(p => p.KupacId == id).ToList();
+            foreach (var projekt in projektiKupca)
             {
                 projekt.Kupac = null;
                 projekt.KupacId = null;
             }
 
-            kupac.Projekti.Clear();
-            AppData.Kupci.Remove(kupac);
+            _context.Kupci.Remove(kupac);
+            _context.SaveChanges();
             TempData["SuccessMessage"] = "Kupac obrisan.";
             return RedirectToAction("Index");
         }

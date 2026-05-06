@@ -1,0 +1,96 @@
+@using PlameniciAplikacija.Models
+@model RadniNalog
+@{
+    ViewData["Title"] = "Uredi radni nalog";
+    var projekti = ViewBag.Projekti as IEnumerable<Project> ?? Enumerable.Empty<Project>();
+}
+
+<nav aria-label="Breadcrumb" class="app-breadcrumb">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Dashboard">Pocetna</a></li>
+        <li class="breadcrumb-item"><a asp-controller="RadniNalozi" asp-action="Index">Radni nalozi</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Uredi</li>
+    </ol>
+</nav>
+
+<section class="lc-header">
+    <div>
+        <p class="lc-eyebrow">Azuriranje</p>
+        <h2 class="lc-title">Uredi radni nalog</h2>
+        <p class="lc-subtitle">Uredi osnovne podatke i status naloga.</p>
+    </div>
+</section>
+
+<form asp-action="Edit" asp-route-id="@Model.Id" method="post" class="card p-4 border-0 shadow-sm">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label asp-for="OznakaNaloga" class="form-label"></label>
+            <input asp-for="OznakaNaloga" class="form-control" />
+            <span asp-validation-for="OznakaNaloga" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="ProjektId" class="form-label">Projekt</label>
+            <select asp-for="ProjektId" class="form-select">
+                @foreach (var projekt in projekti)
+                {
+                    if (projekt.Id == Model.ProjektId)
+                    {
+                        <option value="@projekt.Id" selected>@projekt.BrojProjekta - @projekt.Naziv</option>
+                    }
+                    else
+                    {
+                        <option value="@projekt.Id">@projekt.BrojProjekta - @projekt.Naziv</option>
+                    }
+                }
+            </select>
+            <span asp-validation-for="ProjektId" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="Status" class="form-label"></label>
+            <select asp-for="Status" class="form-select">
+                @foreach (var status in Enum.GetValues<StatusNaloga>())
+                {
+                    if (status == Model.Status)
+                    {
+                        <option value="@status" selected>@status</option>
+                    }
+                    else
+                    {
+                        <option value="@status">@status</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="DatumOtvaranja" class="form-label"></label>
+            <input asp-for="DatumOtvaranja" type="date" class="form-control" value="@Model.DatumOtvaranja.ToString("yyyy-MM-dd")" />
+            <span asp-validation-for="DatumOtvaranja" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="DatumZatvaranja" class="form-label"></label>
+            <input asp-for="DatumZatvaranja" type="date" class="form-control" value="@(Model.DatumZatvaranja?.ToString("yyyy-MM-dd"))" />
+            <span asp-validation-for="DatumZatvaranja" class="text-danger"></span>
+        </div>
+
+        <div class="col-12">
+            <label asp-for="Opis" class="form-label"></label>
+            <textarea asp-for="Opis" rows="4" class="form-control"></textarea>
+            <span asp-validation-for="Opis" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Spremi promjene</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Odustani</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
