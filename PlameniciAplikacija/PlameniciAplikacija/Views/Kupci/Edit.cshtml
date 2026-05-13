@@ -1,0 +1,86 @@
+@model PlameniciAplikacija.Models.Kupac
+@{
+    ViewData["Title"] = $"Uredi kupca - {Model.Naziv}";
+}
+
+<nav aria-label="Breadcrumb" class="app-breadcrumb">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Dashboard">Početna</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Kupci" asp-action="Index">Kupci</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Uredi</li>
+    </ol>
+</nav>
+
+<section class="lc-header">
+    <div>
+        <p class="lc-eyebrow">Baza partnera</p>
+        <h2 class="lc-title">Uredi kupca</h2>
+        <p class="lc-subtitle">Ažuriraj podatke o kupcu bez mijenjanja povezanih projekata.</p>
+    </div>
+    <div class="lc-header-actions">
+        <a asp-action="Index" class="btn btn-outline-secondary">Natrag na listu</a>
+    </div>
+</section>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post" class="row g-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger col-12"></div>
+            <input asp-for="Id" type="hidden" />
+            <div class="col-md-6">
+                <label asp-for="Naziv" class="form-label"></label>
+                <input asp-for="Naziv" class="form-control" />
+                <span asp-validation-for="Naziv" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="OIB" class="form-label"></label>
+                <input asp-for="OIB" class="form-control" />
+                <span asp-validation-for="OIB" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Adresa" class="form-label"></label>
+                <input asp-for="Adresa" class="form-control" />
+                <span asp-validation-for="Adresa" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Grad" class="form-label"></label>
+                @{ ViewData["name"] = "Grad"; ViewData["value"] = Model?.Grad ?? string.Empty; ViewData["apiUrl"] = Url.Action("KupciGradovi", "Lookup"); }
+                @Html.Partial("_AutocompleteDropdown")
+                <span asp-validation-for="Grad" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="KontaktOsoba" class="form-label"></label>
+                <input asp-for="KontaktOsoba" class="form-control" />
+                <span asp-validation-for="KontaktOsoba" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" type="email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Telefon" class="form-label"></label>
+                <input asp-for="Telefon" class="form-control" />
+                <span asp-validation-for="Telefon" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="Tip" class="form-label"></label>
+                <select asp-for="Tip" class="form-select" asp-items="Html.GetEnumSelectList<PlameniciAplikacija.Models.TipKupca>()"></select>
+                <span asp-validation-for="Tip" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="DatumUnosa" class="form-label"></label>
+                <input asp-for="DatumUnosa" type="date" class="form-control" />
+                <span asp-validation-for="DatumUnosa" class="text-danger"></span>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Spremi promjene</button>
+                <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

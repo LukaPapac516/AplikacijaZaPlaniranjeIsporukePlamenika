@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PlameniciAplikacija.Extensions;
 using PlameniciAplikacija.Data;
 using PlameniciAplikacija.Models;
 using System.Diagnostics;
@@ -107,6 +108,14 @@ namespace PlameniciAplikacija.Controllers
                     (isDateSearch && p.DatumUnosa.Date == parsedDate.Date)
                 );
             }
+
+            ViewBag.Search = search;
+
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView("_IndexContent", projekti);
+            }
+
             return View(projekti);
         }
 
@@ -206,6 +215,66 @@ namespace PlameniciAplikacija.Controllers
                 StatusProizvodnje = StatusProizvodnje.NijeUProizvodnji,
                 NapomenaPrioritet = PrioritetNapomene.Srednji
             });
+        }
+
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var projekt = _context.Projekti
+                .Include(p => p.Kupac)
+                .Include(p => p.VrstaPlamenika)
+                .FirstOrDefault(p => p.Id == id);
+
+            if (projekt == null)
+            {
+                TempData["ErrorMessage"] = "Projekt nije pronađen.";
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.Kupci = _context.Kupci.OrderBy(k => k.Naziv).ToList();
+            return View(projekt);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(int id, Project projekt)
+        {
+            var existing = _context.Projekti.FirstOrDefault(p => p.Id == id);
+            if (existing == null)
+            {
+                TempData["ErrorMessage"] = "Projekt nije pronađen.";
+                return RedirectToAction("Index");
+            }
+
+            if (projekt.DatumUnosa == default)
+            {
+                ModelState.Remove(nameof(projekt.DatumUnosa));
+                projekt.DatumUnosa = existing.DatumUnosa;
+            }
+
+            if (!projekt.KupacId.HasValue || !_context.Kupci.Any(k => k.Id == projekt.KupacId.Value))
+            {
+                ModelState.AddModelError(nameof(projekt.KupacId), "Odaberite kupca.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Kupci = _context.Kupci.OrderBy(k => k.Naziv).ToList();
+                return View(projekt);
+            }
+
+            existing.BrojProjekta = projekt.BrojProjekta;
+            existing.Naziv = projekt.Naziv;
+            existing.KupacId = projekt.KupacId;
+            existing.OcekivaniRokIsporuke = projekt.OcekivaniRokIsporuke;
+            existing.RealniRokIsporuke = projekt.RealniRokIsporuke;
+            existing.Napomena = projekt.Napomena;
+            existing.Prioritet = projekt.Prioritet;
+            existing.NapomenaPrioritet = projekt.NapomenaPrioritet;
+            existing.VrstaPlamenikaId = projekt.VrstaPlamenikaId;
+
+            _context.SaveChanges();
+            TempData["SuccessMessage"] = "Projekt ažuriran.";
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

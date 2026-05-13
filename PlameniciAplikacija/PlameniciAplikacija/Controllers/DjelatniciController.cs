@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PlameniciAplikacija.Extensions;
 using PlameniciAplikacija.Data;
 using PlameniciAplikacija.Models;
 using System;
@@ -17,13 +18,31 @@ namespace PlameniciAplikacija.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string? search)
         {
             var djelatnici = _context.Djelatnici
                 .Include(d => d.Projekti)
                 .OrderBy(d => d.Prezime)
                 .ThenBy(d => d.Ime)
                 .ToList();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim();
+                djelatnici = djelatnici.Where(d =>
+                    (d.Ime != null && d.Ime.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                    (d.Prezime != null && d.Prezime.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                    (d.RadnoMjesto != null && d.RadnoMjesto.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                    (d.Email != null && d.Email.Contains(term, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
+            }
+
+            ViewBag.Search = search;
+
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView("_IndexContent", djelatnici);
+            }
 
             return View(djelatnici);
         }

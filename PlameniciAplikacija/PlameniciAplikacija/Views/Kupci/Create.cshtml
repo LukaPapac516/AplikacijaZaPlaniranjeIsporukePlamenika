@@ -23,7 +23,8 @@
     </div>
     <div class="col-md-6">
         <label asp-for="Grad" class="form-label"></label>
-        <input asp-for="Grad" class="form-control" />
+        @{ ViewData["name"] = "Grad"; ViewData["value"] = Model?.Grad ?? string.Empty; ViewData["apiUrl"] = Url.Action("KupciGradovi", "Lookup"); }
+        @Html.Partial("_AutocompleteDropdown")
         <span asp-validation-for="Grad" class="text-danger"></span>
     </div>
     <div class="col-md-6">

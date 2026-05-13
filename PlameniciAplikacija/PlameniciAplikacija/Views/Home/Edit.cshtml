@@ -1,11 +1,11 @@
 @model PlameniciAplikacija.Models.Project
 @using Microsoft.AspNetCore.Mvc.Rendering
 @{
-    ViewData["Title"] = "Novi projekt";
+    ViewData["Title"] = "Uredi projekt";
 }
 
-<h2>Novi projekt</h2>
-<form asp-action="Create" method="post">
+<h2>Uredi projekt</h2>
+<form asp-action="Edit" asp-route-id="@Model.Id" method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
     <div class="mb-3">
         <label asp-for="BrojProjekta" class="form-label"></label>
@@ -28,21 +28,6 @@
         <label asp-for="DatumUnosa" class="form-label"></label>
         <input asp-for="DatumUnosa" class="form-control" type="date" />
         <span asp-validation-for="DatumUnosa" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="StatusPripremeRada" class="form-label"></label>
-        <select asp-for="StatusPripremeRada" class="form-select" asp-items="Html.GetEnumSelectList<PlameniciAplikacija.Models.StatusTriStanja>()"></select>
-        <span asp-validation-for="StatusPripremeRada" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="StatusLansiranja" class="form-label"></label>
-        <select asp-for="StatusLansiranja" class="form-select" asp-items="Html.GetEnumSelectList<PlameniciAplikacija.Models.StatusTriStanja>()"></select>
-        <span asp-validation-for="StatusLansiranja" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="StatusProizvodnje" class="form-label"></label>
-        <select asp-for="StatusProizvodnje" class="form-select" asp-items="Html.GetEnumSelectList<PlameniciAplikacija.Models.StatusProizvodnje>()"></select>
-        <span asp-validation-for="StatusProizvodnje" class="text-danger"></span>
     </div>
     <div class="mb-3">
         <label asp-for="OcekivaniRokIsporuke" class="form-label"></label>
@@ -69,15 +54,11 @@
         }
         @Html.Partial("_AutocompleteDropdown")
     </div>
-    <div class="mb-3">
-        <label asp-for="NapomenaPrioritet" class="form-label">Prioritet napomene</label>
-        <select asp-for="NapomenaPrioritet" class="form-select" asp-items="Html.GetEnumSelectList<PlameniciAplikacija.Models.PrioritetNapomene>()"></select>
-        <span asp-validation-for="NapomenaPrioritet" class="text-danger"></span>
-    </div>
-    <div class="form-check form-switch mb-4">
-        <input asp-for="Prioritet" class="form-check-input" />
-        <label asp-for="Prioritet" class="form-check-label">Projekt je prioritetan</label>
-    </div>
+
     <button type="submit" class="btn btn-primary">Spremi</button>
     <a asp-action="Index" class="btn btn-secondary">Odustani</a>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

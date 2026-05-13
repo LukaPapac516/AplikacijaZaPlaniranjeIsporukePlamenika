@@ -1,0 +1,20 @@
+@*
+Expected ViewData keys:
+ - "name" (string): name for the hidden input to be posted
+ - "value" (string): initial text value (optional)
+ - "placeholder" (string): placeholder text (optional)
+ - "apiUrl" (string): url to call for suggestions (required)
+*@
+@{
+    var name = ViewData["name"] as string ?? "autocompleteValue";
+    var value = ViewData["value"] as string ?? string.Empty;
+    var placeholder = ViewData["placeholder"] as string ?? string.Empty;
+    var apiUrl = ViewData["apiUrl"] as string ?? Url.Action("Plamenici", "Lookup");
+    var id = "ac_" + Guid.NewGuid().ToString("N");
+}
+
+<div class="autocomplete" id="@id" data-autocomplete-api="@apiUrl">
+    <input type="text" class="form-control autocomplete-input" value="@value" placeholder="@placeholder" autocomplete="off" />
+    <input type="hidden" name="@name" value="@value" />
+    <div class="autocomplete-list d-none" role="listbox" aria-hidden="true"></div>
+</div>

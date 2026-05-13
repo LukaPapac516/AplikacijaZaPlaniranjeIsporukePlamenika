@@ -17,6 +17,7 @@ namespace PlameniciAplikacija.Data
         public DbSet<StavkaProizvodnje> StavkeProizvodnje { get; set; }
         public DbSet<FazaProjekta> FazeProjekta { get; set; }
         public DbSet<Napomena> Napomene { get; set; }
+        public DbSet<PlameniciAplikacija.Models.VrstaPlamenika> VrstePlamenika { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

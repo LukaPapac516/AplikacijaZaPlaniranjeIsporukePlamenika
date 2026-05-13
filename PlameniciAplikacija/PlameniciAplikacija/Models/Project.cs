@@ -64,5 +64,8 @@ namespace PlameniciAplikacija.Models
         public virtual ICollection<FazaProjekta> FazeProjekta { get; set; } = new List<FazaProjekta>();
 
         public virtual ICollection<Djelatnik> Djelatnici { get; set; } = new List<Djelatnik>(); // N:M
+        // Veza na vrstu plamenika
+        public int? VrstaPlamenikaId { get; set; }
+        public virtual VrstaPlamenika? VrstaPlamenika { get; set; }
     }
 }

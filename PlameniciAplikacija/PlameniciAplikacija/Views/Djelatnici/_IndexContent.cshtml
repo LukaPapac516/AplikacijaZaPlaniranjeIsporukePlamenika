@@ -1,0 +1,144 @@
+@model IEnumerable<PlameniciAplikacija.Models.Djelatnik>
+@{
+    ViewData["Title"] = "Djelatnici";
+    var employees = Model?.ToList() ?? new List<PlameniciAplikacija.Models.Djelatnik>();
+    var assignedEmployees = employees.Count(d => d.Projekti != null && d.Projekti.Any());
+    var unassignedEmployees = employees.Count(d => d.Projekti == null || !d.Projekti.Any());
+    var search = ViewBag.Search as string ?? string.Empty;
+}
+
+<div data-ajax-list-root>
+    <nav aria-label="Breadcrumb" class="app-breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Dashboard">Početna</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Djelatnici</li>
+        </ol>
+    </nav>
+
+    <section class="lc-header">
+        <div>
+            <p class="lc-eyebrow">Resursi i raspored</p>
+            <h2 class="lc-title">Tim i djelatnici</h2>
+            <p class="lc-subtitle">Prikaz raspoloživosti tima i dodjele projekata.</p>
+        </div>
+        <div class="lc-header-actions">
+            <a asp-action="Create" class="btn btn-primary">Dodaj djelatnika</a>
+        </div>
+    </section>
+
+    <section class="lc-kpi-row" aria-label="KPI djelatnika">
+        <article class="lc-kpi-chip"><span>Ukupno djelatnika</span><strong>@employees.Count</strong></article>
+        <article class="lc-kpi-chip"><span>Dodijeljeni</span><strong>@assignedEmployees</strong></article>
+        <article class="lc-kpi-chip"><span>Neraspoređeni</span><strong>@unassignedEmployees</strong></article>
+    </section>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success" role="alert">@successMessage</div>
+    }
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="alert alert-danger" role="alert">@errorMessage</div>
+    }
+
+    <form method="get" asp-action="Index" class="row g-2 mb-3" data-ajax-search-form data-ajax-live="true">
+        <div class="col-md-5">
+            <input type="text" name="search" value="@search" class="form-control" placeholder="Pretraga: ime, prezime, radno mjesto ili email" />
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filtriraj</button>
+        </div>
+        <div class="col-md-2">
+            <a asp-action="Index" class="btn btn-outline-secondary w-100">Reset</a>
+        </div>
+    </form>
+
+    @if (employees.Any())
+    {
+        <div class="lc-table-shell">
+            <div class="lc-table-head">
+                <h3>Pregled djelatnika</h3>
+                <span class="lc-table-meta">Redaka: @employees.Count</span>
+            </div>
+            <div class="table-responsive lc-table-wrap">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Ime i prezime</th>
+                            <th>Radno mjesto</th>
+                            <th>Tip</th>
+                            <th>Email</th>
+                            <th>Datum zaposlenja</th>
+                            <th>Aktivni projekti</th>
+                            <th>Akcije</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var djelatnik in employees)
+                        {
+                            var detailId = $"employee-details-{djelatnik.Id}";
+                            <tr>
+                                <td class="fw-semibold">
+                                    <button class="btn btn-sm btn-link text-decoration-none p-0 me-2" type="button" data-bs-toggle="collapse" data-bs-target="#@detailId" aria-expanded="false" aria-controls="@detailId">
+                                        <span aria-hidden="true">▸</span>
+                                        <span class="visually-hidden">Prikaži detalje djelatnika @djelatnik.Ime @djelatnik.Prezime</span>
+                                    </button>
+                                    @djelatnik.Ime @djelatnik.Prezime
+                                </td>
+                                <td>@djelatnik.RadnoMjesto</td>
+                                <td>@djelatnik.Tip</td>
+                                <td>
+                                    <a href="mailto:@djelatnik.Email">@djelatnik.Email</a>
+                                </td>
+                                <td>@djelatnik.DatumZaposlenja.ToShortDateString()</td>
+                                <td>
+                                    @if (djelatnik.Projekti.Any())
+                                    {
+                                        <ul class="mb-0 small">
+                                            @foreach (var projekt in djelatnik.Projekti)
+                                            {
+                                                <li>@projekt.BrojProjekta - @projekt.Naziv</li>
+                                            }
+                                        </ul>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Nema dodijeljenih projekata</span>
+                                    }
+                                </td>
+                                <td class="d-flex gap-2">
+                                    <a asp-action="Details" asp-route-id="@djelatnik.Id" class="btn btn-sm btn-outline-dark">Otvori</a>
+                                    <a asp-action="Edit" asp-route-id="@djelatnik.Id" class="btn btn-sm btn-outline-secondary">Uredi</a>
+                                    <form asp-action="Delete" method="post" onsubmit="return confirm('Obrisati djelatnika i ukloniti ga s projekata?');">
+                                        <input type="hidden" name="id" value="@djelatnik.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Obriši</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr class="border-top-0">
+                                <td colspan="7" class="pt-0 pb-0 border-top-0">
+                                    <div class="collapse" id="@detailId">
+                                        <div class="card card-body bg-light border-0 mb-2">
+                                            <div class="row g-2 small">
+                                                <div class="col-md-6"><strong>Ime:</strong> @djelatnik.Ime</div>
+                                                <div class="col-md-6"><strong>Prezime:</strong> @djelatnik.Prezime</div>
+                                                <div class="col-md-6"><strong>Email:</strong> @djelatnik.Email</div>
+                                                <div class="col-md-6"><strong>Radno mjesto:</strong> @djelatnik.RadnoMjesto</div>
+                                                <div class="col-md-6"><strong>Tip:</strong> @djelatnik.Tip</div>
+                                                <div class="col-md-6"><strong>Datum zaposlenja:</strong> @djelatnik.DatumZaposlenja.ToShortDateString()</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted">Još nema unesenih djelatnika.</p>
+    }
+</div>

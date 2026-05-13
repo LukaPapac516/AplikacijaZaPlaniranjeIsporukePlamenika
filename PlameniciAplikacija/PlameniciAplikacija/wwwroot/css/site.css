@@ -34,6 +34,31 @@ body {
   border: 1px solid var(--color-border);
 }
 
+[data-ajax-list-root] {
+  position: relative;
+}
+
+[data-ajax-list-root].is-loading {
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+[data-ajax-list-root].is-loading::after {
+  content: "Učitavanje...";
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 .btn:focus,
 .btn:active:focus,
 .btn-link.nav-link:focus,
@@ -373,6 +398,38 @@ body {
   border-left: 5px solid #f5a524;
   background: #fffaf0;
 }
+
+/* Autocomplete control styles */
+.autocomplete {
+  position: relative;
+}
+.autocomplete .autocomplete-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(15,23,42,0.08);
+  max-height: 240px;
+  overflow: auto;
+  z-index: 1200;
+}
+.autocomplete .autocomplete-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+.autocomplete .autocomplete-item:hover,
+.autocomplete .autocomplete-item.focused {
+  background: var(--color-surface-muted);
+}
+.autocomplete .d-none {
+  display: none !important;
+}
+
 
 .cc-project-card header,
 .cc-project-card footer {

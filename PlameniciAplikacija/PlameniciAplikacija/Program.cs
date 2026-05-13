@@ -3,15 +3,34 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var databasePath = Path.Combine(builder.Environment.ContentRootPath, "plamenici.db");
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 // EF Core DbContext sa SQLite
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+    options.UseSqlite($"Data Source={databasePath}")
 );
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+    // Seed default burner types if table is empty
+    if (db.VrstePlamenika != null && !db.VrstePlamenika.Any())
+    {
+        db.VrstePlamenika.AddRange(
+            new PlameniciAplikacija.Models.VrstaPlamenika { Naziv = "ROTONOX" },
+            new PlameniciAplikacija.Models.VrstaPlamenika { Naziv = "SSBL" },
+            new PlameniciAplikacija.Models.VrstaPlamenika { Naziv = "TEMINOX" },
+            new PlameniciAplikacija.Models.VrstaPlamenika { Naziv = "ATONOX" }
+        );
+        db.SaveChanges();
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

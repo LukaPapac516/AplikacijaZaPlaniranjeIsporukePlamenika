@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PlameniciAplikacija.Extensions;
 using PlameniciAplikacija.Data;
 using PlameniciAplikacija.Models;
 
@@ -43,10 +44,15 @@ namespace PlameniciAplikacija.Controllers
 
             ViewBag.Search = search;
             ViewBag.SelectedStatus = status;
-            ViewBag.Total = _context.RadniNalozi.Count();
-            ViewBag.Active = _context.RadniNalozi.Count(r => r.Status == StatusNaloga.U_Tijeku);
-            ViewBag.Open = _context.RadniNalozi.Count(r => r.Status == StatusNaloga.Otvoren);
-            ViewBag.Closed = _context.RadniNalozi.Count(r => r.Status == StatusNaloga.Zatvoren);
+            ViewBag.Total = radniNalozi.Count;
+            ViewBag.Active = radniNalozi.Count(r => r.Status == StatusNaloga.U_Tijeku);
+            ViewBag.Open = radniNalozi.Count(r => r.Status == StatusNaloga.Otvoren);
+            ViewBag.Closed = radniNalozi.Count(r => r.Status == StatusNaloga.Zatvoren);
+
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView("_IndexContent", radniNalozi);
+            }
 
             return View(radniNalozi);
         }
