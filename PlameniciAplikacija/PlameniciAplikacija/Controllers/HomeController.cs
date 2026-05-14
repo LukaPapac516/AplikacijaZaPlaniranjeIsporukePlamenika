@@ -28,19 +28,19 @@ namespace PlameniciAplikacija.Controllers
             _context = context;
         }
 
-        private static string? ValidateDateOrder(DateTime datumUnosa, DateTime? ocekivaniRok, DateTime? realniRok)
+        private static string? ValidateDateOrder(DateTime datumUnosa, DateTime ocekivaniRok, DateTime? realniRok)
         {
-            if (ocekivaniRok.HasValue && ocekivaniRok.Value.Date < datumUnosa.Date)
+            if (ocekivaniRok < datumUnosa)
             {
                 return "Očekivani rok isporuke mora biti jednak ili nakon datuma unosa.";
             }
 
-            if (realniRok.HasValue && realniRok.Value.Date < datumUnosa.Date)
+            if (realniRok.HasValue && realniRok.Value < datumUnosa)
             {
                 return "Realni rok isporuke mora biti jednak ili nakon datuma unosa.";
             }
 
-            if (ocekivaniRok.HasValue && realniRok.HasValue && realniRok.Value.Date < ocekivaniRok.Value.Date)
+            if (realniRok.HasValue && realniRok.Value < ocekivaniRok)
             {
                 return "Realni rok isporuke mora biti jednak ili nakon očekivanog roka.";
             }
@@ -59,8 +59,7 @@ namespace PlameniciAplikacija.Controllers
             ViewBag.TotalProjects = projekti.Count;
             ViewBag.PriorityProjects = projekti.Count(p => p.Prioritet);
             ViewBag.OverdueProjects = projekti.Count(p =>
-                p.OcekivaniRokIsporuke.HasValue &&
-                p.OcekivaniRokIsporuke.Value.Date < today &&
+                p.OcekivaniRokIsporuke.Date < today &&
                 p.StatusProizvodnje != StatusProizvodnje.Gotovo);
             ViewBag.ActiveCustomers = projekti
                 .Where(p => p.KupacId.HasValue)
@@ -186,7 +185,7 @@ namespace PlameniciAplikacija.Controllers
                 return RedirectToAction("Details", new { id = projektId });
             }
 
-            if (datumZatvaranja.HasValue && datumZatvaranja.Value.Date < datumOtvaranja.Date)
+            if (datumZatvaranja.HasValue && datumZatvaranja.Value < datumOtvaranja)
             {
                 TempData["ErrorMessage"] = "Datum zatvaranja mora biti jednak ili nakon datuma otvaranja.";
                 return RedirectToAction("Details", new { id = projektId });
@@ -211,7 +210,8 @@ namespace PlameniciAplikacija.Controllers
                 .ToList();
             return View(new Project
             {
-                DatumUnosa = DateTime.Today,
+                DatumUnosa = DateTime.Now,
+                OcekivaniRokIsporuke = DateTime.Now.AddDays(7),
                 StatusProizvodnje = StatusProizvodnje.NijeUProizvodnji,
                 NapomenaPrioritet = PrioritetNapomene.Srednji
             });
@@ -284,7 +284,7 @@ namespace PlameniciAplikacija.Controllers
             {
                 // If date was left empty, use today's date and clear binder error.
                 ModelState.Remove(nameof(projekt.DatumUnosa));
-                projekt.DatumUnosa = DateTime.Today;
+                projekt.DatumUnosa = DateTime.Now;
             }
 
             if (!projekt.KupacId.HasValue)

@@ -10,11 +10,19 @@ Expected ViewData keys:
     var value = ViewData["value"] as string ?? string.Empty;
     var placeholder = ViewData["placeholder"] as string ?? string.Empty;
     var apiUrl = ViewData["apiUrl"] as string ?? Url.Action("Plamenici", "Lookup");
+    var validationMessage = ViewData["validationMessage"] as string ?? string.Empty;
     var id = "ac_" + Guid.NewGuid().ToString("N");
 }
 
 <div class="autocomplete" id="@id" data-autocomplete-api="@apiUrl">
     <input type="text" class="form-control autocomplete-input" value="@value" placeholder="@placeholder" autocomplete="off" />
-    <input type="hidden" name="@name" value="@value" />
+    @if (string.IsNullOrWhiteSpace(validationMessage))
+    {
+        <input type="hidden" name="@name" value="@value" class="autocomplete-value" />
+    }
+    else
+    {
+        <input type="hidden" name="@name" value="@value" class="autocomplete-value" data-val="true" data-val-required="@validationMessage" />
+    }
     <div class="autocomplete-list d-none" role="listbox" aria-hidden="true"></div>
 </div>

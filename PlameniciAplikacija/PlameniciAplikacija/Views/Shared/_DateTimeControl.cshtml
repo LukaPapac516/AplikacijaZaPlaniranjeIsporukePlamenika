@@ -1,0 +1,59 @@
+@{
+    var name = ViewData["name"] as string ?? "datetimeValue";
+    var placeholder = ViewData["placeholder"] as string ?? string.Empty;
+    var value = ViewData["value"];
+    var formId = ViewData["form"] as string;
+    var requiredMessage = ViewData["validationMessage"] as string ?? string.Empty;
+    var invalidMessage = ViewData["invalidMessage"] as string ?? "Unesite valjan datum i vrijeme.";
+    var id = "dt_" + Guid.NewGuid().ToString("N");
+
+    DateTime? dateTimeValue = null;
+    if (value is DateTime dateTime)
+    {
+        dateTimeValue = dateTime;
+    }
+    else if (value != null && DateTime.TryParse(value.ToString(), out var parsedValue))
+    {
+        dateTimeValue = parsedValue;
+    }
+
+    var isoValue = dateTimeValue.HasValue ? dateTimeValue.Value.ToString("yyyy-MM-ddTHH:mm:ss") : string.Empty;
+}
+
+<div class="datetime-control" id="@id" data-datetime-control>
+    <div class="datetime-control-grid">
+        @if (string.IsNullOrWhiteSpace(formId))
+        {
+            <input type="text" class="form-control datetime-control-date" autocomplete="off" inputmode="numeric" placeholder="Datum" />
+            <input type="text" class="form-control datetime-control-time" autocomplete="off" inputmode="numeric" placeholder="Vrijeme" />
+        }
+        else
+        {
+            <input type="text" class="form-control datetime-control-date" autocomplete="off" inputmode="numeric" placeholder="Datum" form="@formId" />
+            <input type="text" class="form-control datetime-control-time" autocomplete="off" inputmode="numeric" placeholder="Vrijeme" form="@formId" />
+        }
+    </div>
+    @if (string.IsNullOrWhiteSpace(formId))
+    {
+        if (string.IsNullOrWhiteSpace(requiredMessage))
+        {
+            <input type="hidden" name="@name" value="@isoValue" class="datetime-control-value" data-datetime-invalid-message="@invalidMessage" />
+        }
+        else
+        {
+            <input type="hidden" name="@name" value="@isoValue" class="datetime-control-value" data-datetime-invalid-message="@invalidMessage" data-val="true" data-val-required="@requiredMessage" />
+        }
+    }
+    else
+    {
+        if (string.IsNullOrWhiteSpace(requiredMessage))
+        {
+            <input type="hidden" name="@name" value="@isoValue" class="datetime-control-value" data-datetime-invalid-message="@invalidMessage" form="@formId" />
+        }
+        else
+        {
+            <input type="hidden" name="@name" value="@isoValue" class="datetime-control-value" data-datetime-invalid-message="@invalidMessage" form="@formId" data-val="true" data-val-required="@requiredMessage" />
+        }
+    }
+    <span class="text-danger datetime-control-error"></span>
+</div>

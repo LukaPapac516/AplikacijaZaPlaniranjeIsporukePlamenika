@@ -28,6 +28,7 @@
             ViewData["value"] = Model?.RadnoMjesto ?? string.Empty; 
             ViewData["placeholder"] = "Unesi radno mjesto...";
             ViewData["apiUrl"] = Url.Action("RadnaMjesta", "Lookup");
+            ViewData["validationMessage"] = "Radno mjesto je obavezno.";
         }
         @Html.Partial("_AutocompleteDropdown")
         <span asp-validation-for="RadnoMjesto" class="text-danger"></span>
@@ -39,7 +40,8 @@
     </div>
     <div class="col-md-4">
         <label asp-for="DatumZaposlenja" class="form-label"></label>
-        <input asp-for="DatumZaposlenja" type="date" class="form-control" />
+        @{ ViewData["name"] = "DatumZaposlenja"; ViewData["value"] = Model?.DatumZaposlenja; ViewData["validationMessage"] = "Datum zaposlenja je obavezan."; }
+        @Html.Partial("_DateTimeControl")
         <span asp-validation-for="DatumZaposlenja" class="text-danger"></span>
     </div>
     <div class="col-12">

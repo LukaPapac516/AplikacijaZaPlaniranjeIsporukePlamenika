@@ -67,7 +67,7 @@ namespace PlameniciAplikacija.Controllers
         {
             return View(new Kupac
             {
-                DatumUnosa = DateTime.Today,
+                DatumUnosa = DateTime.Now,
                 Tip = TipKupca.PravnaOsoba
             });
         }
@@ -144,7 +144,7 @@ namespace PlameniciAplikacija.Controllers
                 ModelState.AddModelError(nameof(kupac.OIB), "OIB je obavezan.");
             }
 
-            kupac.DatumUnosa = kupac.DatumUnosa == default ? DateTime.Today : kupac.DatumUnosa;
+            kupac.DatumUnosa = kupac.DatumUnosa == default ? DateTime.Now : kupac.DatumUnosa;
 
             if (!ModelState.IsValid)
             {

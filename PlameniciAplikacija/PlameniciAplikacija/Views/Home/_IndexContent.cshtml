@@ -138,13 +138,13 @@
                                 .OrderBy(d => d.Prezime)
                                 .ThenBy(d => d.Ime)
                                 .ToList();
-                            <tr>
+                            <tr class="project-row" data-project-row="@projekt.Id">
                                 <td>@projekt.BrojProjekta</td>
                                 <td>@projekt.Naziv</td>
                                 <td>@projekt.Kupac?.Naziv</td>
                                 <td>@projekt.DatumUnosa.ToShortDateString()</td>
                                 <td>
-                                    <select form="@updateFormId" name="statusPripremeRada" class="form-select form-select-sm @GetStatusColor(projekt.StatusPripremeRada.ToString())">
+                                    <select form="@updateFormId" name="statusPripremeRada" class="form-select form-select-sm js-project-status @GetStatusColor(projekt.StatusPripremeRada.ToString())">
                                         @foreach (var status in Enum.GetValues<StatusTriStanja>())
                                         {
                                             if (status == projekt.StatusPripremeRada)
@@ -159,7 +159,7 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <select form="@updateFormId" name="statusLansiranja" class="form-select form-select-sm @GetStatusColor(projekt.StatusLansiranja.ToString())">
+                                    <select form="@updateFormId" name="statusLansiranja" class="form-select form-select-sm js-project-status @GetStatusColor(projekt.StatusLansiranja.ToString())">
                                         @foreach (var status in Enum.GetValues<StatusTriStanja>())
                                         {
                                             if (status == projekt.StatusLansiranja)
@@ -174,7 +174,7 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <select form="@updateFormId" name="statusProizvodnje" class="form-select form-select-sm @GetStatusColor(projekt.StatusProizvodnje.ToString())">
+                                    <select form="@updateFormId" name="statusProizvodnje" class="form-select form-select-sm js-project-status @GetStatusColor(projekt.StatusProizvodnje.ToString())">
                                         @foreach (var status in Enum.GetValues<StatusProizvodnje>())
                                         {
                                             if (status == projekt.StatusProizvodnje)
@@ -188,9 +188,10 @@
                                         }
                                     </select>
                                 </td>
-                                <td>@projekt.OcekivaniRokIsporuke?.ToShortDateString()</td>
+                                <td>@projekt.OcekivaniRokIsporuke.ToShortDateString()</td>
                                 <td>
-                                    <input form="@updateFormId" type="date" name="realniRokIsporuke" value="@(projekt.RealniRokIsporuke?.ToString("yyyy-MM-dd"))" class="form-control form-control-sm" />
+                                    @{ ViewData["name"] = "realniRokIsporuke"; ViewData["value"] = projekt.RealniRokIsporuke; ViewData["form"] = updateFormId; }
+                                    @Html.Partial("_DateTimeControl")
                                 </td>
                                 <td>@projekt.Kasnjenje</td>
                                 <td>
@@ -198,7 +199,7 @@
                                 </td>
                                 <td>
                                     <span class="note-priority-pill @GetPriorityClass(projekt.NapomenaPrioritet)">@projekt.NapomenaPrioritet</span>
-                                    <select form="@updateFormId" name="napomenaPrioritet" class="form-select form-select-sm mt-1 note-priority-select @GetPriorityClass(projekt.NapomenaPrioritet)">
+                                    <select form="@updateFormId" name="napomenaPrioritet" class="form-select form-select-sm mt-1 note-priority-select js-project-status @GetPriorityClass(projekt.NapomenaPrioritet)">
                                         @foreach (var prioritet in Enum.GetValues<PrioritetNapomene>())
                                         {
                                             if (prioritet == projekt.NapomenaPrioritet)
@@ -214,15 +215,15 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="form-check form-switch d-inline-flex align-items-center justify-content-center">
-                                        <input form="@updateFormId" class="form-check-input" type="checkbox" name="prioritet" value="true" @(projekt.Prioritet ? "checked" : string.Empty) />
+                                        <input form="@updateFormId" class="form-check-input js-project-status" type="checkbox" name="prioritet" value="true" @(projekt.Prioritet ? "checked" : string.Empty) />
                                     </div>
                                 </td>
                                 <td>
-                                    <a asp-action="Details" asp-route-id="@projekt.Id" class="btn btn-sm btn-secondary mb-1">Otvori</a>
+                                    <a asp-action="Details" asp-route-id="@projekt.Id" class="btn btn-sm btn-secondary mb-1 js-open-details">Otvori</a>
                                     <button type="button" class="btn btn-sm btn-outline-dark mb-1" data-bs-toggle="collapse" data-bs-target="#@teamCollapseId" aria-expanded="false" aria-controls="@teamCollapseId">
                                         Tim
                                     </button>
-                                    <form id="@updateFormId" asp-action="Update" method="post" class="mb-1">
+                                    <form id="@updateFormId" asp-action="Update" method="post" class="mb-1 js-project-status-form">
                                         <input type="hidden" name="id" value="@projekt.Id" />
                                         <button type="submit" class="btn btn-sm btn-primary">Spremi</button>
                                     </form>

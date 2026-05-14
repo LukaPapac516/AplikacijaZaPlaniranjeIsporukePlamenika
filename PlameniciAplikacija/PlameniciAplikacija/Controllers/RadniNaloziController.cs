@@ -81,7 +81,7 @@ namespace PlameniciAplikacija.Controllers
                 return RedirectToAction("Index");
             }
 
-            if (updated.DatumZatvaranja.HasValue && updated.DatumZatvaranja.Value.Date < updated.DatumOtvaranja.Date)
+            if (updated.DatumZatvaranja.HasValue && updated.DatumZatvaranja.Value < updated.DatumOtvaranja)
             {
                 ModelState.AddModelError(nameof(updated.DatumZatvaranja), "Datum zatvaranja mora biti jednak ili nakon datuma otvaranja.");
             }

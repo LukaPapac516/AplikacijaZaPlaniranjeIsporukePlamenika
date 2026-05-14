@@ -39,15 +39,16 @@ namespace PlameniciAplikacija.Models
         public StatusTriStanja StatusLansiranja { get; set; }
         public StatusProizvodnje StatusProizvodnje { get; set; }
 
-        public DateTime? OcekivaniRokIsporuke { get; set; }
+        [Required(ErrorMessage = "Očekivani rok isporuke je obavezan")]
+        public DateTime OcekivaniRokIsporuke { get; set; }
         public DateTime? RealniRokIsporuke { get; set; }
         public int? Kasnjenje
         {
             get
             {
-                if (RealniRokIsporuke.HasValue && OcekivaniRokIsporuke.HasValue)
+                if (RealniRokIsporuke.HasValue)
                 {
-                    return (RealniRokIsporuke.Value - OcekivaniRokIsporuke.Value).Days;
+                    return (RealniRokIsporuke.Value - OcekivaniRokIsporuke).Days;
                 }
                 return null;
             }

@@ -68,7 +68,7 @@ namespace PlameniciAplikacija.Controllers
             PopulateProjects();
             return View(new Djelatnik
             {
-                DatumZaposlenja = DateTime.Today,
+                DatumZaposlenja = DateTime.Now,
                 Tip = TipDjelatnika.Inzenjer
             });
         }
@@ -77,7 +77,7 @@ namespace PlameniciAplikacija.Controllers
         public IActionResult Create(Djelatnik djelatnik, List<int>? projektiIds)
         {
             ValidateEmployee(djelatnik);
-            djelatnik.DatumZaposlenja = djelatnik.DatumZaposlenja == default ? DateTime.Today : djelatnik.DatumZaposlenja;
+            djelatnik.DatumZaposlenja = djelatnik.DatumZaposlenja == default ? DateTime.Now : djelatnik.DatumZaposlenja;
 
             if (!ModelState.IsValid)
             {

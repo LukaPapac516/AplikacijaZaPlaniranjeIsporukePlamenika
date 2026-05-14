@@ -26,7 +26,8 @@
     </div>
     <div class="mb-3">
         <label asp-for="DatumUnosa" class="form-label"></label>
-        <input asp-for="DatumUnosa" class="form-control" type="date" />
+        @{ ViewData["name"] = "DatumUnosa"; ViewData["value"] = Model?.DatumUnosa; ViewData["validationMessage"] = "Datum unosa je obavezan."; }
+        @Html.Partial("_DateTimeControl")
         <span asp-validation-for="DatumUnosa" class="text-danger"></span>
     </div>
     <div class="mb-3">
@@ -46,12 +47,18 @@
     </div>
     <div class="mb-3">
         <label asp-for="OcekivaniRokIsporuke" class="form-label"></label>
-        <input asp-for="OcekivaniRokIsporuke" class="form-control" type="date" />
+        @{ 
+            ViewData["name"] = "OcekivaniRokIsporuke"; 
+            ViewData["value"] = Model?.OcekivaniRokIsporuke; 
+            ViewData["validationMessage"] = "Očekivani rok isporuke je obavezan";
+        }
+        @Html.Partial("_DateTimeControl")
         <span asp-validation-for="OcekivaniRokIsporuke" class="text-danger"></span>
     </div>
     <div class="mb-3">
         <label asp-for="RealniRokIsporuke" class="form-label"></label>
-        <input asp-for="RealniRokIsporuke" class="form-control" type="date" />
+        @{ ViewData["name"] = "RealniRokIsporuke"; ViewData["value"] = Model?.RealniRokIsporuke; }
+        @Html.Partial("_DateTimeControl")
         <span asp-validation-for="RealniRokIsporuke" class="text-danger"></span>
     </div>
     <div class="mb-3">
@@ -81,3 +88,7 @@
     <button type="submit" class="btn btn-primary">Spremi</button>
     <a asp-action="Index" class="btn btn-secondary">Odustani</a>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

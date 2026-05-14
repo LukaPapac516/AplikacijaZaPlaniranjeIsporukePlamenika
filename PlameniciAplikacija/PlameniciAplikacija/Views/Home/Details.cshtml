@@ -19,7 +19,7 @@
     </ol>
 </nav>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="detail-hero d-flex justify-content-between align-items-center mb-3">
     <h2 class="mb-0">Projekt @Model.BrojProjekta - @Model.Naziv</h2>
     <a asp-action="Index" class="btn btn-link">&larr; Natrag na listu</a>
 </div>
@@ -38,7 +38,7 @@
     </div>
 }
 
-<div class="card mb-4">
+<div class="card mb-4 detail-card">
     <div class="card-body">
         <div class="row g-3">
             <div class="col-md-6">
@@ -48,7 +48,7 @@
                     <dt class="col-sm-5">Datum unosa</dt>
                     <dd class="col-sm-7">@Model.DatumUnosa.ToShortDateString()</dd>
                     <dt class="col-sm-5">Očekivani rok</dt>
-                    <dd class="col-sm-7">@Model.OcekivaniRokIsporuke?.ToShortDateString()</dd>
+                    <dd class="col-sm-7">@Model.OcekivaniRokIsporuke.ToShortDateString()</dd>
                     <dt class="col-sm-5">Realni rok</dt>
                     <dd class="col-sm-7">@Model.RealniRokIsporuke?.ToShortDateString()</dd>
                     <dt class="col-sm-5">Kašnjenje (dana)</dt>
@@ -80,7 +80,7 @@
 <h4>Radni nalozi</h4>
 @if (Model.RadniNalozi != null && Model.RadniNalozi.Any())
 {
-    <div class="table-responsive">
+    <div class="table-responsive detail-card detail-card-stagger">
         <table class="table table-striped table-bordered align-middle">
             <thead class="table-light">
                 <tr>
@@ -102,10 +102,12 @@
                             <input form="@formId" type="text" name="opis" value="@nalog.Opis" class="form-control form-control-sm" />
                         </td>
                         <td>
-                            <input form="@formId" type="date" name="datumOtvaranja" value="@nalog.DatumOtvaranja.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+                            @{ ViewData["name"] = "datumOtvaranja"; ViewData["value"] = nalog.DatumOtvaranja; ViewData["form"] = formId; ViewData["validationMessage"] = "Datum otvaranja je obavezan."; }
+                            @Html.Partial("_DateTimeControl")
                         </td>
                         <td>
-                            <input form="@formId" type="date" name="datumZatvaranja" value="@(nalog.DatumZatvaranja?.ToString("yyyy-MM-dd"))" class="form-control form-control-sm" />
+                            @{ ViewData["name"] = "datumZatvaranja"; ViewData["value"] = nalog.DatumZatvaranja; ViewData["form"] = formId; }
+                            @Html.Partial("_DateTimeControl")
                         </td>
                         <td>
                             <select form="@formId" name="status" class="form-select form-select-sm">
@@ -143,7 +145,7 @@ else
 @if (Model.StavkeProizvodnje != null && Model.StavkeProizvodnje.Any())
 {
     <h4 class="mt-4">Stavke proizvodnje</h4>
-    <div class="table-responsive">
+    <div class="table-responsive detail-card detail-card-stagger">
         <table class="table table-striped table-bordered align-middle">
             <thead class="table-light">
                 <tr>
@@ -168,4 +170,8 @@ else
             </tbody>
         </table>
     </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }

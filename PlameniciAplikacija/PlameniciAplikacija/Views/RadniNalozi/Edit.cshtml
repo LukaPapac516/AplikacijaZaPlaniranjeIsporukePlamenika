@@ -68,13 +68,15 @@
 
         <div class="col-md-4">
             <label asp-for="DatumOtvaranja" class="form-label"></label>
-            <input asp-for="DatumOtvaranja" type="date" class="form-control" value="@Model.DatumOtvaranja.ToString("yyyy-MM-dd")" />
+            @{ ViewData["name"] = "DatumOtvaranja"; ViewData["value"] = Model?.DatumOtvaranja; ViewData["validationMessage"] = "Datum otvaranja je obavezan."; }
+            @Html.Partial("_DateTimeControl")
             <span asp-validation-for="DatumOtvaranja" class="text-danger"></span>
         </div>
 
         <div class="col-md-4">
             <label asp-for="DatumZatvaranja" class="form-label"></label>
-            <input asp-for="DatumZatvaranja" type="date" class="form-control" value="@(Model.DatumZatvaranja?.ToString("yyyy-MM-dd"))" />
+            @{ ViewData["name"] = "DatumZatvaranja"; ViewData["value"] = Model?.DatumZatvaranja; }
+            @Html.Partial("_DateTimeControl")
             <span asp-validation-for="DatumZatvaranja" class="text-danger"></span>
         </div>
 

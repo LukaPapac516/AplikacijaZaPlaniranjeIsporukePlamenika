@@ -70,7 +70,8 @@
             </div>
             <div class="col-md-3">
                 <label asp-for="DatumUnosa" class="form-label"></label>
-                <input asp-for="DatumUnosa" type="date" class="form-control" />
+                @{ ViewData["name"] = "DatumUnosa"; ViewData["value"] = Model?.DatumUnosa; ViewData["validationMessage"] = "Datum unosa je obavezan."; }
+                @Html.Partial("_DateTimeControl")
                 <span asp-validation-for="DatumUnosa" class="text-danger"></span>
             </div>
             <div class="col-12 d-flex gap-2">
